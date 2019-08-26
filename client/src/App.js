@@ -1,85 +1,50 @@
-import React, { Component } from "react";
-import {
-  Button,
-  Grid,
-  Header,
-  Message,
-  Segment,
-  Container
-} from "semantic-ui-react";
+import React, { Component, useState } from "react";
 import io from "socket.io-client";
-
+import { useCookies } from 'react-cookie'
 import Login from "./Login";
 
 const socket = io.connect("http://localhost:3001");
+window.socket = socket;
 
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      username: "",
-      password: "",
-      message: ""
-    };
-    socket.on("poked", () => this.setState({ message: "poked" }));
-    socket.on("tickled", () => this.setState({ message: "tickled" }));
+function App() {
+  const [state, setState] = useState({ username: '', password: ''});
+  const [cookies, setCookie] = useCookies(['user']);
+
+  if(cookies.user && !window.user) {
+    socket.emit("authentication", {})
   }
 
-  onLogIn = () => {
-    socket.emit("authentication", this.state);
+  socket.on("authenticated", (user) => {
+    window.user = user
+    setCookie('user', user, { path: '/' });
+  });
+
+  const onLogIn = () => {
+    socket.emit("authentication", {username: state.username, password: state.password});
   };
 
-  onSignUp = () => {
-    socket.emit("authentication", { ...this.state, register: true });
+  const onSignUp = () => {
+    socket.emit("authentication", { username: state.username, password: state.password, register: true });
   };
 
-  onChange = e => {
-    this.setState({ [e.target.name]: e.target.value });
-  };
-
-  onSocket = event => () => {
+  const onSocket = event => () => {
     socket.emit(event);
   };
 
-  actions = {
-    onLogIn: this.onLogIn,
-    onSignUp: this.onSignUp,
-    onChange: this.onChange
+  const onChange = e => {
+    setState({ ...state, [e.target.name]: e.target.value });
   };
 
-  render() {
-    return (
-      <Container>
-        <Grid textAlign="center" verticalAlign="middle">
-          <Grid.Column width={6}>
-            <Login actions={this.actions} values={this.state} />
-          </Grid.Column>
-          <Grid.Column width={6}>
-            <Segment>
-              <Header>Send an Event:</Header>
-              <Button
-                onClick={this.onSocket("poke")}
-                color="green"
-                size="large"
-              >
-                Poke
-              </Button>
-              <Button
-                onClick={this.onSocket("tickle")}
-                color="red"
-                size="large"
-              >
-                Tickle
-              </Button>
-              <Message>
-                <Message.Header>Event Response</Message.Header>
-                <Message.Content>{this.state.message}</Message.Content>
-              </Message>
-            </Segment>
-          </Grid.Column>
-        </Grid>
-      </Container>
-    );
+  const actions = {
+    onLogIn,
+    onSignUp,
+    onChange
+  };
+
+  if (window.user){
+    return <div>Logged In</div>
+  } else {
+    return <Login actions={actions} values={state} />
   }
 }
 

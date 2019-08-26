@@ -1,33 +1,27 @@
 import React from "react";
-import { Button, Form, Header, Segment } from "semantic-ui-react";
 
 const Login = ({ values, actions }) => (
-  <Form size="large">
-    <Header>Please Log In</Header>
-    <Segment>
-      <Form.Input
+  <div>
+      <input
         name="username"
-        fluid
         placeholder="Username"
         value={values.username}
         onChange={actions.onChange}
       />
-      <Form.Input
+      <input
         name="password"
-        fluid
         placeholder="Password"
         type="password"
         value={values.password}
         onChange={actions.onChange}
       />
-      <Button onClick={actions.onLogIn} color="blue" size="large">
+      <button onClick={actions.onLogIn} color="blue" size="large">
         Log In
-      </Button>
-      <Button onClick={actions.onSignUp} color="violet" size="large">
+      </button>
+      <button onClick={actions.onSignUp} color="violet" size="large">
         Sign Up
-      </Button>
-    </Segment>
-  </Form>
+      </button>
+  </div>
 );
 
 export default Login;

@@ -1,5 +1,5 @@
 {
-  "name": "Papa Bear 2",
+  "name": "papa-bear-2",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
@@ -19,9 +19,13 @@
   "dependencies": {
     "bcrypt": "^1.0.3",
     "bluebird": "^3.5.0",
+    "cookie": "^0.4.0",
+    "cookie-parser": "^1.4.4",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^4.11.11",
     "mongoose-unique-validator": "^1.0.6",
-    "socket.io": "^2.0.3",
+    "socket.io": "^2.2.0",
+    "socket.io-cookie-parser": "^1.0.0",
     "socketio-auth": "^0.1.0"
   }
 }
