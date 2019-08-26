@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/thebopshoobop/socketio-react#readme",
   "dependencies": {
-    "bcrypt": "^1.0.3",
+    "bcrypt": "^3.0.6",
     "bluebird": "^3.5.0",
     "cookie": "^0.4.0",
     "cookie-parser": "^1.4.4",
