@@ -48,6 +48,7 @@ const authenticate = async (client, data, callback) => {
   } catch (error) {
     callback(error);
   }
+  
 };
 
 // Register Actions
