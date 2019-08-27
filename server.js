@@ -6,7 +6,6 @@ const app = express();
 
 // Start it up!
 const port = process.env.PORT || 3001;
-const host = "localhost";
 const logger = () => console.log(`Listening: ${port}`);
 const server = app.listen(port);
 
