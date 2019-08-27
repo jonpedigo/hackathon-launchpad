@@ -3,32 +3,31 @@ import io from "socket.io-client";
 import { useCookies } from 'react-cookie'
 import Login from "./Login";
 
-let socket = io.connect();
-window.socket = socket;
+window.socket = io.connect();
 
 function App() {
   const [state, setState] = useState({ username: '', password: ''});
   const [cookies, setCookie] = useCookies(['user']);
 
   if(cookies.user && !window.user) {
-    socket.emit("authentication", {})
+    window.socket.emit("authentication", {})
   }
 
-  socket.on("authenticated", (user) => {
+  window.socket.on("authenticated", (user) => {
     window.user = user
     setCookie('user', user, { path: '/' });
   });
 
   const onLogIn = () => {
-    socket.emit("authentication", {username: state.username, password: state.password});
+    window.socket.emit("authentication", {username: state.username, password: state.password});
   };
 
   const onSignUp = () => {
-    socket.emit("authentication", { username: state.username, password: state.password, register: true });
+    window.socket.emit("authentication", { username: state.username, password: state.password, register: true });
   };
 
   const onSocket = event => () => {
-    socket.emit(event);
+    window.socket.emit(event);
   };
 
   const onChange = e => {
