@@ -15,7 +15,7 @@ UserSchema.methods.validPassword = function(password) {
 };
 
 UserSchema.virtual("password").set(function(value) {
-  this.passwordHash = bcrypt.hashSync(value, 12);
+  this.passwordHash = bcrypt.hashSync(value, bcrypt.genSaltSync(12));
 });
 
 const User = mongoose.model("User", UserSchema);

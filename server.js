@@ -22,22 +22,18 @@ const mongoose = require("mongoose");
 mongoose.Promise = require("bluebird");
 const mongoOpts = { useMongoClient: true };
 const mongoUrl = "mongodb://heroku_39lqpvm0:k0m7rc2pligndujih4hhlbl4vj@ds139480.mlab.com:39480/heroku_39lqpvm0";
+mongoose
+  .connect(mongoUrl, mongoOpts)
+  .catch(e => console.log(e));
+
 // connect sockets
 const io = require("socket.io")(server);
-
-io.use((socket, next) => {
-  mongoose
-    .connect(mongoUrl, mongoOpts)
-    .then(() => next())
-    .catch(e => console.error(e.stack));
-});
 
 // Authenticate!
 const User = require("./User");
 const authenticate = async (client, data, callback) => {
   const { username, password, register } = data;
 
-  console.log('.')
   if (client.handshake.headers.cookie){
     const cookieUser = cookie.parse(client.handshake.headers.cookie).user;
     if (cookieUser) {
@@ -52,15 +48,12 @@ const authenticate = async (client, data, callback) => {
 
   try {
     if (register) {
-      console.log('..')
-
-      const user = await User.create({ username, password });
+      const user = await User.create({ username, password }).catch((e) => {
+        console.log(e)
+      });
       client.user = user;
-      console.log(user)
       return callback(null, !!user);
     } else {
-      console.log('...')
-
       const user = await User.findOne({ username });
       client.user = user;
       return callback(null, user && user.validPassword(password));
@@ -73,8 +66,6 @@ const authenticate = async (client, data, callback) => {
 
 // Register Actions
 const postAuthenticate = client => {
-  console.log('....')
-
   client.emit('authenticated', jwt.sign(client.user.username, 'secret-words'));
 };
 
