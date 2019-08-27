@@ -3,7 +3,12 @@ import io from "socket.io-client";
 import { useCookies } from 'react-cookie'
 import Login from "./Login";
 
-const socket = io.connect("http://localhost:3001");
+io.configure(function () {
+  io.set("transports", ["xhr-polling"]);
+  io.set("polling duration", 10);
+});
+socket = new io.Socket();
+
 window.socket = socket;
 
 function App() {
