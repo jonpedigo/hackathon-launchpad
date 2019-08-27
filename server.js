@@ -5,7 +5,7 @@ const cookie = require('cookie');
 const app = express();
 
 // Start it up!
-const port = 3001;
+const port = rocess.env.NODE_ENV || 3001;
 const host = "localhost";
 const logger = () => console.log(`Listening: http://${host}:${port}`);
 const server = app.listen(port, host, logger);
