@@ -3,7 +3,11 @@ import io from "socket.io-client";
 import { useCookies } from 'react-cookie'
 import Login from "./Login";
 
-window.socket = io.connect();
+if (window.location.origin.indexOf('localhost') > 0) {
+  window.socket = io.connect('http://localhost:3001');
+} else {
+  window.socket = io.connect();
+}
 
 function App() {
   const [state, setState] = useState({ username: '', password: ''});
