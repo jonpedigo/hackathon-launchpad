@@ -47,10 +47,10 @@ base64id@1.0.0:
   resolved "https://registry.yarnpkg.com/base64id/-/base64id-1.0.0.tgz#47688cb99bb6804f0e06d3e763b1c32e57d8e6b6"
   integrity sha1-R2iMuZu2gE8OBtPnY7HDLlfY5rY=
 
-bcrypt-nodejs@^0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/bcrypt-nodejs/-/bcrypt-nodejs-0.0.3.tgz#c60917f26dc235661566c681061c303c2b28842b"
-  integrity sha1-xgkX8m3CNWYVZsaBBhwwPCsohCs=
+bcrypt-nodejs@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/bcrypt-nodejs/-/bcrypt-nodejs-0.0.2.tgz#b13ed5d42addf35c8ced22ae9a169d06b569d3a0"
+  integrity sha1-sT7V1Crd81yM7SKumhadBrVp06A=
 
 better-assert@~1.0.0:
   version "1.0.2"
