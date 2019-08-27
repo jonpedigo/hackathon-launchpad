@@ -21,7 +21,7 @@ app.use(express.static(require('path').resolve('./client/build')));
 const mongoose = require("mongoose");
 mongoose.Promise = require("bluebird");
 const mongoOpts = { useMongoClient: true };
-const mongoUrl = "mongodb://pedigojon:asdasd123@ds239206.mlab.com:39206/heroku_8v60t1z3";
+const mongoUrl = "mongodb://heroku_39lqpvm0:k0m7rc2pligndujih4hhlbl4vj@ds139480.mlab.com:39480/heroku_39lqpvm0";
 // connect sockets
 const io = require("socket.io")(server);
 
