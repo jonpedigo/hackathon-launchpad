@@ -1,5 +1,4 @@
-// Prepare the Server
-const server = require("http").createServer();
+const express = require('express');
 const io = require("socket.io")(server);
 const socketioAuth = require("socketio-auth");
 const jwt = require('jsonwebtoken');
@@ -10,6 +9,13 @@ const mongoose = require("mongoose");
 mongoose.Promise = require("bluebird");
 const mongoOpts = { useMongoClient: true };
 const mongoUrl = "mongodb://pedigojon:asdasd123@ds239206.mlab.com:39206/heroku_8v60t1z3";
+
+app.get('/', (req, res, next) => {
+  res.sendFile(require('path').resolve('./client/build/index.html'));
+})
+
+// Set static file location for production
+app.use(express.static(require('path').resolve('./client/build')));
 
 io.use((socket, next) => {
   mongoose
@@ -48,7 +54,7 @@ const authenticate = async (client, data, callback) => {
   } catch (error) {
     callback(error);
   }
-  
+
 };
 
 // Register Actions
@@ -63,4 +69,4 @@ socketioAuth(io, { authenticate, postAuthenticate, timeout: "none" });
 const port = 3001;
 const host = "localhost";
 const logger = () => console.log(`Listening: http://${host}:${port}`);
-server.listen(port, host, logger);
+app.listen(port, host, logger);
