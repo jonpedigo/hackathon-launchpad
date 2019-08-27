@@ -56,6 +56,7 @@ const authenticate = async (client, data, callback) => {
 
       const user = await User.create({ username, password });
       client.user = user;
+      console.log(user)
       return callback(null, !!user);
     } else {
       console.log('...')
