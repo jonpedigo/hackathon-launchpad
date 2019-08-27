@@ -1,21 +1,30 @@
 const express = require('express');
-const io = require("socket.io")(server);
 const socketioAuth = require("socketio-auth");
 const jwt = require('jsonwebtoken');
 const cookie = require('cookie');
+const app = express();
 
-// Connect to the Database
-const mongoose = require("mongoose");
-mongoose.Promise = require("bluebird");
-const mongoOpts = { useMongoClient: true };
-const mongoUrl = "mongodb://pedigojon:asdasd123@ds239206.mlab.com:39206/heroku_8v60t1z3";
+// Start it up!
+const port = 3001;
+const host = "localhost";
+const logger = () => console.log(`Listening: http://${host}:${port}`);
+const server = app.listen(port, host, logger);
 
+// serve it up!
 app.get('/', (req, res, next) => {
   res.sendFile(require('path').resolve('./client/build/index.html'));
 })
 
 // Set static file location for production
 app.use(express.static(require('path').resolve('./client/build')));
+
+// Connect to the Database
+const mongoose = require("mongoose");
+mongoose.Promise = require("bluebird");
+const mongoOpts = { useMongoClient: true };
+const mongoUrl = "mongodb://pedigojon:asdasd123@ds239206.mlab.com:39206/heroku_8v60t1z3";
+// connect sockets
+const io = require("socket.io")(server);
 
 io.use((socket, next) => {
   mongoose
@@ -64,9 +73,3 @@ const postAuthenticate = client => {
 
 // Configure Authentication
 socketioAuth(io, { authenticate, postAuthenticate, timeout: "none" });
-
-// Start it up!
-const port = 3001;
-const host = "localhost";
-const logger = () => console.log(`Listening: http://${host}:${port}`);
-app.listen(port, host, logger);
