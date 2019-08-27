@@ -21,6 +21,7 @@ const Login = ({ values, actions }) => (
       <button onClick={actions.onSignUp} color="violet" size="large">
         Sign Up
       </button>
+      <div>{values.message}</div>
   </div>
 );
 

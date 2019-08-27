@@ -10,7 +10,7 @@ if (window.location.origin.indexOf('localhost') > 0) {
 }
 
 function App() {
-  const [state, setState] = useState({ username: '', password: ''});
+  const [state, setState] = useState({ username: '', password: '', message: ''});
   const [cookies, setCookie] = useCookies(['user']);
 
   if(cookies.user && !window.user) {
@@ -22,12 +22,17 @@ function App() {
     setCookie('user', user, { path: '/' });
   });
 
+  window.socket.on("auth_message", ({ message }) => {
+    console.log('hello')
+    setState({...state, message})
+  });
+
   const onLogIn = () => {
     window.socket.emit("authentication", {username: state.username, password: state.password});
   };
 
   const onSignUp = () => {
-    window.socket.emit("authentication", { username: state.username, password: state.password, register: true });
+    window.socket.emit("authentication", { username: state.username, password: state.password, signup: true });
   };
 
   const onSocket = event => () => {

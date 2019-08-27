@@ -32,33 +32,48 @@ const io = require("socket.io")(server);
 // Authenticate!
 const User = require("./User");
 const authenticate = async (client, data, callback) => {
-  const { username, password, register } = data;
-
-  if (client.handshake.headers.cookie){
-    const cookieUser = cookie.parse(client.handshake.headers.cookie).user;
-    if (cookieUser) {
-      const username = jwt.decode(cookieUser, 'secret-words');
-      if(username){
-        const user = await User.findOne({ username });
-        client.user = user;
-        return callback(null, !!user);
-      }
-    }
-  }
+  const { username, password, signup } = data;
 
   try {
-    if (register) {
-      const user = await User.create({ username, password }).catch((e) => {
-        console.log(e)
-      });
+    // session
+    if (client.handshake.headers.cookie){
+      const cookieUser = cookie.parse(client.handshake.headers.cookie).user;
+      if (cookieUser) {
+        const username = jwt.decode(cookieUser, 'secret-words');
+        if(username){
+          const user = await User.findOne({ username });
+          if (!user) {
+            client.emit('auth_message', { message: 'No such user'})
+            return;
+          }
+          client.user = user;
+          return callback(null, !!user);
+        }
+      }
+    }
+
+    // sign up
+    if (signup) {
+      const user = await User.create({ username, password });
       client.user = user;
       return callback(null, !!user);
-    } else {
-      const user = await User.findOne({ username });
-      client.user = user;
-      return callback(null, user && user.validPassword(password));
     }
+
+    // login
+    const user = await User.findOne({ username });
+    if (!user) {
+      client.emit('auth_message', { message: 'No such username and password combination'})
+      return;
+    }
+    if(user.validPassword(password)) {
+      client.user = user;
+      return callback(null, user);
+    }
+
+    client.emit('auth_message',  { message: 'No such username and password combination'})
   } catch (error) {
+    client.emit('auth_message', { message: 'Authentication error. Username probably already exists'})
+    console.log(error)
     callback(error);
   }
 
