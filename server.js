@@ -37,6 +37,7 @@ const User = require("./User");
 const authenticate = async (client, data, callback) => {
   const { username, password, register } = data;
 
+  console.log('.')
   if (client.handshake.headers.cookie){
     const cookieUser = cookie.parse(client.handshake.headers.cookie).user;
     if (cookieUser) {
@@ -51,10 +52,14 @@ const authenticate = async (client, data, callback) => {
 
   try {
     if (register) {
+      console.log('..')
+
       const user = await User.create({ username, password });
       client.user = user;
       return callback(null, !!user);
     } else {
+      console.log('...')
+
       const user = await User.findOne({ username });
       client.user = user;
       return callback(null, user && user.validPassword(password));
@@ -67,6 +72,8 @@ const authenticate = async (client, data, callback) => {
 
 // Register Actions
 const postAuthenticate = client => {
+  console.log('....')
+
   client.emit('authenticated', jwt.sign(client.user.username, 'secret-words'));
 };
 
