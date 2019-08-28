@@ -13,12 +13,19 @@ export default function Home() {
       stage: app.stage,
     })
 
+    const flame2 = flameEmitter({
+      startPos: {x:500, y:500},
+      stage: app.stage,
+    })
+
+    const emitters = [flame, flame2];
+
     var elapsed = Date.now();
     var update = function(){
     	requestAnimationFrame(update);
 
     	var now = Date.now();
-    	flame.update((now - elapsed) * 0.001);
+    	emitters.forEach(e => e.update((now - elapsed) * 0.001));
     	elapsed = now;
 
     	app.render(app.stage);
