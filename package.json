@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "deploy": "cd client && yarn build && git add -A && git commit -m 'deploy' && git push heroku master"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
     "mongoose": "^4.11.11",
     "mongoose-unique-validator": "^1.0.6",
     "node": "^12.9.0",
+    "pixi-particles": "^4.1.2",
     "socket.io": "^2.2.0",
     "socket.io-cookie-parser": "^1.0.0",
     "socketio-auth": "^0.1.1"

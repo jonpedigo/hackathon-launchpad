@@ -1,30 +1,33 @@
-import React, { Component, useState } from "react";
+import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import { useCookies } from 'react-cookie'
 import Login from "./Login";
+import Home from "./Home";
 
 if (window.location.origin.indexOf('localhost') > 0) {
-  window.socket = io.connect('http://localhost:3001');
+  window.socket = io.connect('http://localhost:4000');
 } else {
   window.socket = io.connect();
 }
 
 function App() {
-  const [state, setState] = useState({ username: '', password: '', message: ''});
   const [cookies, setCookie] = useCookies(['user']);
+  const [state, setState] = useState({ username: '', password: '', message: '', checkingCookie: !!cookies.user});
 
-  if(cookies.user && !window.user) {
-    window.socket.emit("authentication", {})
-  }
+  useEffect(() => {
+    if(cookies.user && !window.user) {
+      window.socket.emit("authentication", {})
+    }
+  }, [])
 
   window.socket.on("authenticated", (user) => {
-    window.user = user
     setCookie('user', user, { path: '/' });
+    window.user = user;
+    setState({...state, checkingCookie: false});
   });
 
   window.socket.on("auth_message", ({ message }) => {
-    console.log('hello')
-    setState({...state, message})
+    setState({...state, message, checkingCookie: false})
   });
 
   const onLogIn = () => {
@@ -35,25 +38,26 @@ function App() {
     window.socket.emit("authentication", { username: state.username, password: state.password, signup: true });
   };
 
-  const onSocket = event => () => {
-    window.socket.emit(event);
-  };
-
   const onChange = e => {
     setState({ ...state, [e.target.name]: e.target.value });
   };
 
-  const actions = {
-    onLogIn,
-    onSignUp,
-    onChange
-  };
-
-  if (window.user){
-    return <div>Logged In</div>
-  } else {
-    return <Login actions={actions} values={state} />
+  if (window.user) {
+    return <Home/>
   }
+
+  if (!state.checkingCookie) {
+    console.log(state, !!window.user)
+    return (
+      <Login actions={{
+        onLogIn,
+        onSignUp,
+        onChange
+      }} values={state} />
+    )
+  }
+
+  return null
 }
 
 export default App;
