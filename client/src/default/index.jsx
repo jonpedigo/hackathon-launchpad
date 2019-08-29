@@ -4,40 +4,29 @@ import { Viewport } from 'pixi-viewport'
 
 import { flameEmitter } from './particles'
 
-// const gameState = [];
-// for (let i = 0; i < 50; i++) {
-//   gameState.push({
-//     x: i * 40,
-//     y: i * 40,
-//     character: 'W',
-//     color: 'white',
-//   })
-// }
-
 let previousGameStateLength = 0
 const gameStateLookup = {}
-
-const initializeGameItem = gameItem => {
-  let text = new PIXI.Text(gameItem.character, {fontFamily : 'Courier New', fontSize: 40, fill : '#ff1010', align : 'center'})
-  text.transform.position.x = gameItem.x
-  text.transform.position.y = gameItem.y
-  gameStateLookup[gameItem.name] = stage.addChild(text)
-}
-
-const updateGameItem = (pixiItem, gameItem) => {
-  pixiItem.style.fill = gameItem.color
-  pixiItem.location.x = gameItem.x
-  pixiItem.location.y = gameItem.y
-
-  //TODO: remove pixi item if it has like a DONTRENDER property
-  //TODO: remove and add pixi item if character has changed
-}
-
 
 export default function Home() {
   const canvasRef = useRef(null)
 
   useEffect(() => {
+    const initializeGameItem = gameItem => {
+      let text = new PIXI.Text(gameItem.character, {fontFamily : 'Courier New', fontSize: 40, fill : '#ff1010', align : 'center'})
+      text.transform.position.x = gameItem.x
+      text.transform.position.y = gameItem.y
+      gameStateLookup[gameItem.name] = stage.addChild(text)
+    }
+
+    const updateGameItem = (pixiItem, gameItem) => {
+      pixiItem.style.fill = gameItem.color
+      pixiItem.location.x = gameItem.x
+      pixiItem.location.y = gameItem.y
+
+      //TODO: remove pixi item if it has like a DONTRENDER property
+      //TODO: remove and add pixi item if character has changed
+    }
+
     const width = window.innerWidth;
     const height = window.innerHeight;
     const worldWidth = 2000
@@ -66,9 +55,9 @@ export default function Home() {
     const stage = viewport;
 
     // initialize game state
-    window.socket.emit('listen for updates')
+    window.socket.emit('listen for game updates')
 
-    window.socket.on('initialize state', (gameState) => {
+    window.socket.on('initialize game', (gameState) => {
       gameState.forEach(initializeGameItem)
     })
 
@@ -83,7 +72,7 @@ export default function Home() {
           }
         }
       }
-      previousGameState = gameState;
+      previousGameStateLength = gameState;
     })
 
     // particle emitters
