@@ -20,8 +20,8 @@ const flameEmitter = ({startPos, stage, particles = ['https://pixijs.io/pixi-par
     		"end": "#ff622c"
     	},
     	"speed": {
-    		"start": 500,
-    		"end": 500,
+    		"start": 200,
+    		"end": 200,
     		"minimumSpeedMultiplier": 1
     	},
     	"acceleration": {
@@ -39,8 +39,8 @@ const flameEmitter = ({startPos, stage, particles = ['https://pixijs.io/pixi-par
     		"max": 50
     	},
     	"lifetime": {
-    		"min": 0.1,
-    		"max": 0.75
+    		"min": 0.01,
+    		"max": 0.1
     	},
     	"blendMode": "normal",
     	"frequency": 0.001,
