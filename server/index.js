@@ -30,7 +30,7 @@ mongoose
 const io = require("socket.io")(server)
 
 // Authenticate!
-const User = require("./User")
+const User = require("./db/User")
 const authenticate = async (socket, data, callback) => {
   const { username, password, signup } = data
 
@@ -43,7 +43,7 @@ const authenticate = async (socket, data, callback) => {
         if(username){
           const user = await User.findOne({ username })
           if (!user) {
-            socket.emit('auth_message', { message: 'No such user'})
+            socket.emit('auth_message', { message: 'No such username and password combination'})
             return
           }
           socket.user = user

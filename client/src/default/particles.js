@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 const pixiParticles = require('pixi-particles');
 
-const flameEmitter = ({startPos, stage, particles = ['https://pixijs.io/pixi-particles-editor/assets/images/particle.png', 'https://pixijs.io/pixi-particles-editor/assets/images/Fire.png'], startEmitting = true}) => {
+function flameEmitter({startPos, stage, particles = ['https://pixijs.io/pixi-particles-editor/assets/images/particle.png', 'https://pixijs.io/pixi-particles-editor/assets/images/Fire.png'], startEmitting = true}) {
   var emitter = new pixiParticles.Emitter(
     stage,
     particles.map(p => PIXI.Texture.from(p)),

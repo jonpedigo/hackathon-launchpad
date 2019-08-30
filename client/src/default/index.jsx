@@ -1,27 +1,26 @@
 import React, { useState, useRef, useEffect } from "react"
 import * as PIXI from 'pixi.js'
-import { Viewport } from 'pixi-viewport'
 
 import { flameEmitter } from './particles'
 
 let previousGameStateLength = 0
 const gameStateLookup = {}
 
-export default function Home() {
+export default function Index() {
   const canvasRef = useRef(null)
 
   useEffect(() => {
-    const initializeGameItem = gameItem => {
+    const initGameItem = gameItem => {
       let text = new PIXI.Text(gameItem.character, {fontFamily : 'Courier New', fontSize: 40, fill : '#ff1010', align : 'center'})
-      text.transform.position.x = gameItem.x
-      text.transform.position.y = gameItem.y
+      text.transform.position.x = gameItem.x * 40
+      text.transform.position.y = gameItem.y * 40
       gameStateLookup[gameItem.name] = stage.addChild(text)
     }
 
     const updateGameItem = (pixiItem, gameItem) => {
       pixiItem.style.fill = gameItem.color
-      pixiItem.location.x = gameItem.x
-      pixiItem.location.y = gameItem.y
+      pixiItem.location.x = gameItem.x * 40
+      pixiItem.location.y = gameItem.y * 40
 
       //TODO: remove pixi item if it has like a DONTRENDER property
       //TODO: remove and add pixi item if character has changed
@@ -29,36 +28,16 @@ export default function Home() {
 
     const width = window.innerWidth;
     const height = window.innerHeight;
-    const worldWidth = 2000
-    const worldHeight = 2000
-    const worldMinX = worldWidth / 2
-    const worldMinY = worldHeight / 2
 
-    // initialize pixi renderer and camera
+    // init pixi renderer and camera
     const app = new PIXI.Application({ view: canvasRef.current, width: width, height: height })
-    const viewport = new Viewport({
-        screenWidth: width,
-        screenHeight: height,
-        worldWidth: worldWidth,
-        worldHeight: worldHeight,
-        interaction: app.renderer.interaction,
-    })
-    viewport
-        .drag()
-        .wheel({ percent: 0.3 })
-        .decelerate()
-        .clampZoom({
-          maxWidth: worldWidth,
-          maxHeight: worldHeight,
-        })
-    app.stage.addChild(viewport)
-    const stage = viewport;
+    const stage = app.stage;
 
-    // initialize game state
+    // init game state
     window.socket.emit('listen for game updates')
 
-    window.socket.on('initialize game', (gameState) => {
-      gameState.forEach(initializeGameItem)
+    window.socket.on('init game', (gameState) => {
+      gameState.forEach(initGameItem)
     })
 
     window.socket.on('update game ', gameState => {
@@ -66,7 +45,7 @@ export default function Home() {
         for(let i = 0; i < gameState.length; i++) {
           let gameItem = gameState[i]
           if (i >= previousGameStateLength) {
-            initializeGameItem(gameItem);
+            initGameItem(gameItem);
           } else {
             updateGameItem(gameStateLookup[gameItem.name], gameItem);
           }
@@ -92,7 +71,5 @@ export default function Home() {
     })
   }, [])
 
-  return <div>
-    <canvas ref={canvasRef}></canvas>
-  </div>
+  return <canvas ref={canvasRef}></canvas>
 }
