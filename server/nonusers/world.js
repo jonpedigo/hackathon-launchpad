@@ -59,13 +59,12 @@ module.exports = function(game, socket, mongoose){
     game.height = findFurthestCoordinate(game, 'y') + 10;
     game.grid = createGrid(game);
     game.pathfindingGrid = convertGridToPathfindingGrid(game.grid);
-
-    console.log(game.pathfindingGrid)
   }
 
   function update(){
 
   }
+
 
   return {
     init,

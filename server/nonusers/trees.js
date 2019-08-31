@@ -6,6 +6,7 @@ module.exports = function(game, socket, mongoose){
         x: i,
         y: i,
         character: 'T',
+        sprite: 'tree-1',
         color: 'green',
         name: 'tree-' + i,
         hard: true,
