@@ -1,17 +1,50 @@
-//populates the world with trees
-module.exports = function(game, io){
+// DESCRIPTION: populate world with trees
+
+/*
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        PUBLIC FUNCTIONS
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+*/
+
+
+/*
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          EXPORT
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+*/
+
+module.exports = function(game){
   function init(items){
-    for (let i = 0; i < 50; i++) {
+    game.forEveryGridNode(game, (gridNode, x, y) => {
       items.push({
-        x: i,
-        y: i,
-        character: 'T',
-        sprite: 'tree-1',
+        x: x,
+        y: y,
+        character: 'G',
+        sprite: 'grass-1',
         color: 'green',
-        name: 'tree-' + i,
-        hard: true,
+        name: 'grass-' + (x + y),
+        hard: false,
       })
-    }
+      if(Math.random() > .7){
+        items.push({
+          x: x,
+          y: y,
+          character: 'T',
+          sprite: 'tree-1',
+          color: 'green',
+          name: 'tree-' + (x + y),
+          hard: true,
+        })
+      }
+    })
   }
 
   function setup(){
@@ -29,3 +62,14 @@ module.exports = function(game, io){
     update,
   }
 }
+
+
+/*
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          PRIVATE FUNCTIONS
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+*/

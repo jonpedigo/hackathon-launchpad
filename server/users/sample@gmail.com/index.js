@@ -1,16 +1,48 @@
-module.exports = function(game, socket){
-  function init(){
+// DESCRIPTION: Sample game modification
+
+/*
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        PUBLIC FUNCTIONS
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+*/
+
+
+
+/*
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          EXPORT
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+*/
+
+module.exports = function(game){
+
+  // add all items to databas
+    // runs on initialize game script
+  function init(itemList){
 
   }
 
+  // setup game logic
+    // runs every time server is started
   function setup(){
 
   }
 
+  // trigger, collisions
+    // runs every update about 100 milliseconds
   function update(){
 
   }
 
+  // on player input
   function input(user, data){
     if(user !== 'jonpedigo') return
 
@@ -26,3 +58,13 @@ module.exports = function(game, socket){
     update,
   }
 }
+
+/*
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+          PRIVATE FUNCTIONS
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+*/

@@ -3,23 +3,17 @@ const GameState = require("./db/GameState")
 const config = require('./config')
 
 module.exports = async function(io){
+  // init game
   const gameState = await GameState.findOne({_id: config.currentGameStateId})
-  const game = {
-    id: gameState.id,
-    itemList: gameState.itemList,
-    items: gameState.itemList.reduce((obj, item) => {
-      obj[item.name] = item
-      return obj
-    }),
-    updates: [],
-  };
+  const game = require('./nonusers/game')().init(gameState);
 
+  // game modifications
   const gameModifications = [];
-  gameModifications.push(require('./nonusers/trees')(game, io));
-  gameModifications.push(require('./users/sample@gmail.com')(game, io));
+  gameModifications.push(require('./nonusers/trees')(game));
+  gameModifications.push(require('./users/sample@gmail.com')(game));
+  // special scenario - must be last
+  gameModifications.push(require('./nonusers/game')(game));
 
-  //special scenario - must be last
-  gameModifications.push(require('./nonusers/world')(game, io));
   gameModifications.forEach(({setup, update}) => {
     setup();
     game.updates.push(update);
@@ -34,7 +28,7 @@ module.exports = async function(io){
 
     gameState.itemList = game.itemList
     gameState.save().then(() => {
-      // console.log('game ' + gameState.id + ' saved')
+      console.log('game ' + gameState.id + ' saved')
     }).catch((e) => console.log('failed to save', e))
   }, 600)
   console.log('game ' + game.id + ' started');

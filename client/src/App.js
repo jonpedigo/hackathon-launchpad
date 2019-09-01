@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import { useCookies } from 'react-cookie'
 import Login from "./Login";
-import Index from "./default";
+import Sample from "./sample";
 
 if (window.location.origin.indexOf('localhost') > 0) {
   window.socket = io.connect('http://localhost:4000');
@@ -43,7 +43,7 @@ function App() {
   };
 
   if (window.user) {
-    return <Index/>
+    return <Sample/>
   }
 
   if (!state.checkingCookie) {

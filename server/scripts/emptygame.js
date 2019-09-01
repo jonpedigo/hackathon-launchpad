@@ -9,14 +9,7 @@ mongoose
   .connect(mongoUrl, mongoOpts).then(async () => {
     const gameState = await GameState.findOne({_id: config.currentGameStateId})
     const itemList = [];
-
-    // to setup current game parameters
-    const game = require('../nonusers/game')().init(gameState);
-
-    // list all services you wanna use
-    require('../nonusers/trees')(game).init(game.itemList);
-
-    gameState.itemList = game.itemList
+    gameState.itemList = [];
     gameState.save().then((game) => {
       console.log('initialized ' + game.itemList.length + ' game items')
     }).catch(e => console.log(e));

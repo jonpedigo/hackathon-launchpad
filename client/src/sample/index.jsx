@@ -2,45 +2,47 @@ import React, { useState, useRef, useEffect } from "react"
 import * as PIXI from 'pixi.js'
 import tileset from './tileset.json'
 import { flameEmitter } from './particles'
+import { keyboard } from './input'
 
 let previousGameItemListLength = 0
 const gameItems = {}
 
+const GRID_SIZE = 40
+const STAGE_WIDTH = window.innerWidth;
+const STAGE_HEIGHT = window.innerHeight;
+
 const initGameItem = ({gameItem, textures, stage}) => {
   if (gameItem.sprite) {
     let sprite = new PIXI.Sprite(textures[gameItem.sprite])
-    sprite.transform.position.x = gameItem.x * 40
-    sprite.transform.position.y = gameItem.y * 40
+    sprite.transform.position.x = (gameItem.x * GRID_SIZE)
+    sprite.transform.position.y = (gameItem.y * GRID_SIZE)
     sprite.transform.scale.x = 5
     sprite.transform.scale.y = 5
     gameItems[gameItem.name] = stage.addChild(sprite)
   } else if (gameItem.character) {
-    let text = new PIXI.Text(gameItem.character, {fontFamily : 'Courier New', fontSize: 40, fill : '#ff1010', align : 'center'})
-    text.transform.position.x = gameItem.x * 40
-    text.transform.position.y = gameItem.y * 40
+    let text = new PIXI.Text(gameItem.character, {fontFamily : 'Courier New', fontSize: GRID_SIZE, fill : '#ff1010', align : 'center'})
+    text.transform.position.x = (gameItem.x * GRID_SIZE)
+    text.transform.position.y = (gameItem.y * GRID_SIZE)
     gameItems[gameItem.name] = stage.addChild(text)
   }
 }
 
 const updateGameItem = (pixiItem, gameItem, texture, stage) => {
   pixiItem.style.fill = gameItem.color
-  pixiItem.location.x = gameItem.x * 40
-  pixiItem.location.y = gameItem.y * 40
+  pixiItem.location.x = (gameItem.x * GRID_SIZE)
+  pixiItem.location.y = (gameItem.y * GRID_SIZE)
 
   //TODO: remove pixi item if it has like a DONTRENDER property
   //TODO: remove and add pixi item if character has changed
 }
 
-export default function Index() {
+export default function Sample() {
   const canvasRef = useRef(null)
 
   useEffect(() => {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
     // init pixi renderer and camera
     const textures = {};
-    const app = new PIXI.Application({ view: canvasRef.current, width: width, height: height })
+    const app = new PIXI.Application({ view: canvasRef.current, width: STAGE_WIDTH, height: STAGE_HEIGHT })
     const stage = app.stage;
 
     app.stop();
@@ -59,12 +61,8 @@ export default function Index() {
 
       window.socket.on('init game', (gameItemList) => {
         gameItemList.forEach((gameItem) => initGameItem({gameItem, textures, stage}))
+        keyboard(stage)
         app.start();
-      })
-
-      window.socket.on('hello', () => {
-        console.log('...')
-
       })
 
       window.socket.on('update game ', gameItemList => {
