@@ -11,9 +11,7 @@ function listen({onListen, onInitGameItem, onUpdateGameItem, onUpdateComplete}){
     onListen(gameItemList)
   })
 
-  window.socket.on('update game ', gameItemList => {
-    console.log('...updating at all')
-
+  window.socket.on('update game', gameItemList => {
     if(gameItemList.length > previousGameItemListLength) {
       for(let i = 0; i < gameItemList.length; i++) {
         let gameItem = gameItemList[i]

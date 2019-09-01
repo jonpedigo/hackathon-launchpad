@@ -22,6 +22,7 @@ module.exports = async function(io){
   const socketsPlaying = [];
   // start game
   setInterval(() => {
+    console.log(socketsPlaying)
     socketsPlaying.forEach((socket)=> {
       socket.emit('update game', game.itemList)
     })
