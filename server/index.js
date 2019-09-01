@@ -5,6 +5,7 @@ const cookie = require('cookie')
 const app = express()
 const game = require('./game')
 const config = require('./config')
+
 // Start it up!
 const port = process.env.PORT || 4000
 const logger = () => console.log(`Listening: ${port}`)
@@ -80,11 +81,14 @@ const authenticate = async (socket, data, callback) => {
 
 }
 
-// Register Actions
-const postAuthenticate = socket => {
-  socket.emit('authenticated', jwt.sign(socket.user.username, 'secret-words'))
-  game(socket)
-}
+// start game
+game(io).then(({addSocket}) => {
+  // Register Actions
+  const postAuthenticate = socket => {
+    socket.emit('authenticated', jwt.sign(socket.user.username, 'secret-words'))
+    addSocket(socket)
+  }
 
-// Configure Authentication
-socketioAuth(io, { authenticate, postAuthenticate, timeout: "none" })
+  // Configure Authentication
+  socketioAuth(io, { authenticate, postAuthenticate, timeout: "none" })
+})

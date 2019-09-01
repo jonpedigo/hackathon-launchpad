@@ -62,6 +62,11 @@ export default function Index() {
         app.start();
       })
 
+      window.socket.on('hello', () => {
+        console.log('...')
+
+      })
+
       window.socket.on('update game ', gameItemList => {
         if(gameItemList.length > previousGameItemListLength) {
           for(let i = 0; i < gameItemList.length; i++) {

@@ -11,8 +11,17 @@ module.exports = function(game, socket){
 
   }
 
+  function input(user, data){
+    if(user !== 'jonpedigo') return
+
+    if(data.char === 'uparrow') {
+
+    }
+  }
+
   return {
     init,
+    input,
     setup,
     update,
   }
