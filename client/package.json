@@ -3,15 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "node-sass": "^4.12.0",
-    "pixi-particles": "^4.1.2",
-    "pixi-viewport": "^4.2.2",
-    "pixi.js": "^5.1.2",
-    "react": "^16.8.1",
-    "react-cookie": "^4.0.1",
-    "react-dom": "^16.8.1",
+    "node-sass": "4.12.0",
+    "pixi-particles": "4.1.2",
+    "pixi-viewport": "4.2.2",
+    "pixi.js": "5.1.2",
+    "react": "16.8.1",
+    "react-cookie": "4.0.1",
+    "react-dom": "16.8.1",
     "react-scripts": "1.0.13",
-    "socket.io-client": "^2.2.0"
+    "socket.io-client": "2.1.1"
   },
   "scripts": {
     "start": "PORT=4001 react-scripts start",

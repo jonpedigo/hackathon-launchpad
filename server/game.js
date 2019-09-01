@@ -25,12 +25,14 @@ module.exports = async function(io){
     socketsPlaying.forEach((socket)=> {
       socket.emit('update game', game.itemList)
     })
+  }, 600)
 
+  setInterval(() => {
     gameState.itemList = game.itemList
     gameState.save().then(() => {
       console.log('game ' + gameState.id + ' saved')
     }).catch((e) => console.log('failed to save', e))
-  }, 600)
+  }, 60000)
   console.log('game ' + game.id + ' started');
 
   return {

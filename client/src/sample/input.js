@@ -1,6 +1,6 @@
-// Handle keyboard controls
+// Handle keyboard and mouse controls
 
-function keyboard(stage){
+function keyboard({stage}){
   /*
     left arrow	37
     up arrow	38
