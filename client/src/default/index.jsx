@@ -3,8 +3,8 @@ import * as PIXI from 'pixi.js'
 import tileset from './tileset.json'
 import { flameEmitter } from './particles'
 
-let previousGameStateLength = 0
-const gameStateLookup = {}
+let previousGameItemListLength = 0
+const gameItems = {}
 
 const initGameItem = ({gameItem, textures, stage}) => {
   if (gameItem.sprite) {
@@ -13,13 +13,12 @@ const initGameItem = ({gameItem, textures, stage}) => {
     sprite.transform.position.y = gameItem.y * 40
     sprite.transform.scale.x = 5
     sprite.transform.scale.y = 5
-    gameStateLookup[gameItem.name] = stage.addChild(sprite)
-  }
-  else if (gameItem.character) {
+    gameItems[gameItem.name] = stage.addChild(sprite)
+  } else if (gameItem.character) {
     let text = new PIXI.Text(gameItem.character, {fontFamily : 'Courier New', fontSize: 40, fill : '#ff1010', align : 'center'})
     text.transform.position.x = gameItem.x * 40
     text.transform.position.y = gameItem.y * 40
-    gameStateLookup[gameItem.name] = stage.addChild(text)
+    gameItems[gameItem.name] = stage.addChild(text)
   }
 }
 
@@ -49,7 +48,6 @@ export default function Index() {
       tileset.forEach((tile) => {
         var baseTexture = new PIXI.BaseTexture('static/img/tileset.png');
         var texture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(tile.x, tile.y, tile.width, tile.height));
-        // let texture = PIXI.Texture.from('static/img/tileset.png', tile.x, tile.y, tile.width, tile.height)
         textures[tile.name] = texture
       })
       start()
@@ -59,39 +57,34 @@ export default function Index() {
       // init game state
       window.socket.emit('listen for game updates')
 
-      window.socket.on('init game', (gameState) => {
-        gameState.forEach((gameItem) => initGameItem({gameItem, textures, stage}))
+      window.socket.on('init game', (gameItemList) => {
+        gameItemList.forEach((gameItem) => initGameItem({gameItem, textures, stage}))
         app.start();
       })
 
-      window.socket.on('update game ', gameState => {
-        if(gameState.length > previousGameStateLength) {
-          for(let i = 0; i < gameState.length; i++) {
-            let gameItem = gameState[i]
-            if (i >= previousGameStateLength) {
+      window.socket.on('update game ', gameItemList => {
+        if(gameItemList.length > previousGameItemListLength) {
+          for(let i = 0; i < gameItemList.length; i++) {
+            let gameItem = gameItemList[i]
+            if (i >= previousGameItemListLength) {
               initGameItem(gameItem);
             } else {
-              updateGameItem(gameStateLookup[gameItem.name], gameItem);
+              updateGameItem(gameItems[gameItemList.name], gameItem);
             }
           }
         }
-        previousGameStateLength = gameState;
+        previousGameItemListLength = gameItemList;
       })
 
       // particle emitters
-      const flame = flameEmitter({
-        startPos: {x:300, y:500},
-        stage
-      })
-
-      const flame2 = flameEmitter({
+      const flame1 = flameEmitter({
         startPos: {x:500, y:500},
         stage
       })
 
-      const emitters = []
+      const emitters = [flame1]
       app.ticker.add((delta) => {
-        emitters.forEach(e => e.update((delta) * .02))
+        emitters.forEach(e => e.update((delta) * .012))
       })
     }
   }, [])

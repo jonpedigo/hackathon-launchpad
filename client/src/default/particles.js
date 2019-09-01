@@ -11,8 +11,8 @@ function flameEmitter({startPos, stage, particles = ['https://pixijs.io/pixi-par
     		"end": 0
     	},
     	"scale": {
-    		"start": 0.25,
-    		"end": 0.75,
+    		"start": 0.2,
+    		"end": 0.6,
     		"minimumScaleMultiplier": 1
     	},
     	"color": {
@@ -55,7 +55,7 @@ function flameEmitter({startPos, stage, particles = ['https://pixijs.io/pixi-par
     	"spawnCircle": {
     		"x": 0,
     		"y": 0,
-    		"r": 10
+    		"r": 15,
     	}
     }
   );

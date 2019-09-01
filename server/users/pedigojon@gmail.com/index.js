@@ -1,4 +1,4 @@
-module.exports = function(game, socket, mongoose){
+module.exports = function(game, socket){
   function init(){
 
   }

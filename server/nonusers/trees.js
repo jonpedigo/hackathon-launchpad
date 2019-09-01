@@ -1,8 +1,8 @@
 //populates the world with trees
 module.exports = function(game, socket, mongoose){
-  function init(){
+  function init(items){
     for (let i = 0; i < 50; i++) {
-      game.state.push({
+      items.push({
         x: i,
         y: i,
         character: 'T',

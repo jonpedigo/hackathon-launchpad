@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken')
 const cookie = require('cookie')
 const app = express()
 const game = require('./game')
+const config = require('./config')
 // Start it up!
 const port = process.env.PORT || 4000
 const logger = () => console.log(`Listening: ${port}`)
@@ -21,7 +22,7 @@ app.use(express.static(require('path').resolve('./client/build')))
 const mongoose = require("mongoose")
 mongoose.Promise = require("bluebird")
 const mongoOpts = { useMongoClient: true }
-const mongoUrl = "mongodb://heroku_39lqpvm0:k0m7rc2pligndujih4hhlbl4vj@ds139480.mlab.com:39480/heroku_39lqpvm0"
+const mongoUrl = config.mongodb
 mongoose
   .connect(mongoUrl, mongoOpts)
   .catch(e => console.log(e))

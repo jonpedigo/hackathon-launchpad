@@ -2,7 +2,7 @@
 
 function findFurthestCoordinate(game, coordinate){
   let furthest = 0;
-  game.state.forEach(gameItem => {
+  game.itemList.forEach(gameItem => {
     if(gameItem[coordinate] > furthest) furthest = gameItem[coordinate];
   })
   return furthest;
@@ -18,7 +18,7 @@ function createGrid(game){
     }
   }
 
-  game.state.forEach(gameItem => {
+  game.itemList.forEach(gameItem => {
     let gridNode = grid[gameItem.x][gameItem.y]
     if(gridNode){
       gridNode.push(gameItem)
@@ -49,10 +49,8 @@ function convertGridToPathfindingGrid(grid) {
   return pathfindingGrid;
 }
 
-module.exports = function(game, socket, mongoose){
-  function init(){
-
-  }
+module.exports = function(game, socket){
+  function init(){}
 
   function setup(){
     game.width = findFurthestCoordinate(game, 'x') + 10;
