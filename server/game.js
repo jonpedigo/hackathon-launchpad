@@ -19,13 +19,9 @@ module.exports = async function(io){
     game.updates.push(update);
   })
 
-  const socketsPlaying = [];
   // start game
   setInterval(() => {
-    console.log(socketsPlaying)
-    socketsPlaying.forEach((socket)=> {
-      socket.emit('update game', game.itemList)
-    })
+    io.emit('update game', game.itemList)
   }, 600)
 
   setInterval(() => {
@@ -36,18 +32,14 @@ module.exports = async function(io){
   }, 60000)
   console.log('game ' + game.id + ' started');
 
-  return {
-    addSocket: (socket) => {
-      socket.on('listen for game updates', () => {
-        console.log(socket.user.username + ' joined')
-        socketsPlaying.push(socket)
-        socket.emit('init game', game.itemList)
-      })
+  // listen for events
+  game.on = (socket, event, data) => {
+    if(event === 'input'){
       gameModifications.forEach(({input}) => {
-        if(input) {
-          socket.on('input', (data) => { input(socket.user, data)})
-        }
+        if(input) input(socket.user, data)
       })
     }
   }
+
+  return game
 }

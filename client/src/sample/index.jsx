@@ -6,17 +6,13 @@ import socket from './socket'
 
 function onLoad({app, textures, pixiItems}){
   const stage = app.stage;
-  app.stop()
+  keyboard({stage})
   socket.listen({
     onInitGameItem: ({gameItem}) => {
       map.initGameItem({gameItem, stage, textures})
     },
     onUpdateGameItem: ({gameItem}) => {
       map.updateGameItem({gameItem, stage, textures})
-    },
-    onListen: () => {
-      app.start()
-      keyboard({stage})
     }
   })
 }

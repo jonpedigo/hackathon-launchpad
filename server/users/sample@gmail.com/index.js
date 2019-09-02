@@ -44,7 +44,7 @@ module.exports = function(game){
 
   // on player input
   function input(user, data){
-    if(user !== 'jonpedigo') return
+    if(user.username !== 'jonpedigo') return
 
     if(data.char === 'uparrow') {
 

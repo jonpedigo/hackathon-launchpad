@@ -3,14 +3,6 @@
 let previousGameItemListLength = 0
 
 function listen({onListen, onInitGameItem, onUpdateGameItem, onUpdateComplete}){
-  // init game state
-  window.socket.emit('listen for game updates')
-
-  window.socket.on('init game', (gameItemList) => {
-    gameItemList.forEach((gameItem) => onInitGameItem({gameItem}))
-    onListen(gameItemList)
-  })
-
   window.socket.on('update game', gameItemList => {
     if(gameItemList.length > previousGameItemListLength) {
       for(let i = 0; i < gameItemList.length; i++) {
@@ -22,6 +14,8 @@ function listen({onListen, onInitGameItem, onUpdateGameItem, onUpdateComplete}){
         }
       }
     }
+
+    window.socket.emit('input', 99)
 
     if(onUpdateComplete) onUpdateComplete(gameItemList)
 

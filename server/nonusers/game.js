@@ -1,5 +1,9 @@
 // DESCRIPTION: define parameters of the game world, add core functions to game object
 
+// TODO: The concept of time and death
+// TODO: Tag system
+// TODO: My first character! the woodcutter
+
 /*
 
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -91,16 +95,12 @@ function _findFurthestCoordinate(game, coordinate){
 
 function _createGrid(game){
   const grid = [];
-  const start = Date.now()
   for (let x = 0; x < game.width; x++) {
     grid.push([])
     for (let y = 0; y < game.height; y++) {
-      console.log('grid', x, y)
       grid[x].push([])
     }
   }
-
-  console.log(Date.now() - start)
 
   game.itemList.forEach(gameItem => {
     let gridNode = grid[gameItem.x][gameItem.y]

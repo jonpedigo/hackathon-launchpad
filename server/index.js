@@ -72,6 +72,7 @@ const authenticate = async (socket, data, callback) => {
       return callback(null, user)
     }
 
+    // error handling
     socket.emit('auth_message',  { message: 'No such username and password combination'})
   } catch (error) {
     socket.emit('auth_message', { message: 'Authentication error. Username probably already exists'})
@@ -81,12 +82,15 @@ const authenticate = async (socket, data, callback) => {
 
 }
 
+
 // start game
-game(io).then(({addSocket}) => {
-  // Register Actions
+game(io).then((game) => {
   const postAuthenticate = socket => {
     socket.emit('authenticated', jwt.sign(socket.user.username, 'secret-words'))
-    addSocket(socket)
+
+    socket.on('input', data => {
+      game.on(socket, 'input', data)
+    })
   }
 
   // Configure Authentication
