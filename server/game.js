@@ -20,8 +20,11 @@ module.exports = async function(io){
   })
 
   // start game
+  let previousUpdateTime = Date.now()
   setInterval(() => {
+    game.update(Date.now() - previousUpdateTime)
     io.emit('update game', game.itemList)
+    previousUpdateTime = Date.now()
   }, 600)
 
   setInterval(() => {
@@ -29,7 +32,7 @@ module.exports = async function(io){
     gameState.save().then(() => {
       console.log('game ' + gameState.id + ' saved')
     }).catch((e) => console.log('failed to save', e))
-  }, 60000)
+  }, 600000)
   console.log('game ' + game.id + ' started');
 
   // listen for events
@@ -39,6 +42,12 @@ module.exports = async function(io){
         if(input) input(socket.user, data)
       })
     }
+  }
+
+  game.update = (delta) => {
+    game.updates.forEach((update) => {
+      update(delta)
+    })
   }
 
   return game

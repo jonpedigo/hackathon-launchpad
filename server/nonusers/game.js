@@ -44,7 +44,6 @@ module.exports = function(game){
         return obj
       }, {}),
       updates: [],
-
     }
 
     // game.width = _findFurthestCoordinate(game, 'x') + 10
@@ -62,7 +61,7 @@ module.exports = function(game){
 
   }
 
-  function update(){
+  function update(delta){
     game.grid = _createGrid(game)
     game.pathfindingGrid = _convertGridToPathfindingGrid(game.grid)
   }

@@ -38,7 +38,7 @@ module.exports = function(game){
 
   // trigger, collisions
     // runs every update about 100 milliseconds
-  function update(){
+  function update(delta){
 
   }
 

@@ -51,7 +51,7 @@ module.exports = function(game){
 
   }
 
-  function update(){
+  function update(delta){
 
   }
 
