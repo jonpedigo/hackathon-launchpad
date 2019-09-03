@@ -24,7 +24,6 @@ export default function Logs({user}) {
   useEffect(() => {
     socket.listen({
       onGetLogs: (logs) => {
-        console.log(logs)
         setLogs(logs)
       }
     })

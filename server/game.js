@@ -68,11 +68,11 @@ module.exports = async function(io){
       socket.emit('init game', game.itemList)
     })
     socket.on('ask for log history', (data) => {
-      socket.emit('new logs', game.logs)
+      socket.emit('new logs', game.logs.slice(-100))
     })
     socket.on('add log', (data) => {
       game.logs.push(data)
-      io.emit('new logs', game.logs)
+      io.emit('new logs', game.logs.slice(-100))
     })
   }
 

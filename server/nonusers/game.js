@@ -88,8 +88,7 @@ module.exports = function(game = {}){
     game.id = gameState.id
     game.itemList = gameState.itemList
     game.logs = gameState.logs
-    game.logs.push('testing')
-
+    
     const { items, tags } = _generateItemLookupAndTags(game)
     game.items = items
     game.tags = tags
