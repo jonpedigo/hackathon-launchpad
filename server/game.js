@@ -13,55 +13,66 @@ module.exports = async function(io){
   gameModifications.push(require('./nonusers/trees')(game));
   gameModifications.push(require('./users/sample@gmail.com')(game));
 
-  gameModifications.forEach(({setup, update}) => {
+  gameModifications.forEach(({setup}) => {
     setup();
-    game.updates.push(update);
   })
+  gameService.setup()
 
   // start game
   let previousUpdateTime = Date.now()
   setInterval(() => {
-    let delta = Date.now() - previousUpdateTime
-
-    const oldItemList = game.itemList.map((gameItem) => {
+    // store current game state and log length
+    let oldLogsLength = game.logs.length
+    let oldItemList = game.itemList.map((gameItem) => {
       return Object.assign({}, gameItem)
     })
 
-    game.updates.forEach((update) => {
-      update(delta)
+    //update game
+    let delta = Date.now() - previousUpdateTime
+    gameModifications.forEach(({update}) => {
+      update(delta);
     })
-
     gameService.update(delta)
-
-    const gameItemUpdate = game.generateGameItemUpdate(oldItemList, game.items, game.itemList)
-
-    // oldItemList.forEach((item) => {
-    //   if(item.name === 'grass_197') console.log(item.x)
-    // })
-    // console.log(game.items['grass_197'].x)
-    console.log(gameItemUpdate.updated.length)
-    io.emit('update game', gameItemUpdate)
     previousUpdateTime = Date.now()
+
+    //package and send game state update for server
+    const gameItemUpdate = game.generateGameItemUpdate(oldItemList, game.items, game.itemList)
+    io.emit('update game', gameItemUpdate)
+
+    //send new logs if there are any
+    if(oldLogsLength < game.logs.length) {
+      io.emit('new logs', game.logs.slice(oldLogsLength))
+    }
   }, 600)
   console.log('game ' + game.id + ' started');
 
+  // save every ten minutes
   setInterval(() => {
     gameState.itemList = game.itemList
+    gameState.logs = game.logs
+    gameState.markModified('itemList')
+    gameState.markModified('logs')
     gameState.save().then(() => {
       console.log('game ' + gameState.id + ' saved')
     }).catch((e) => console.log('failed to save', e))
-  }, 600000)
+  }, 60000)
 
   //listen for events
-  game.on = (socket, event, data) => {
-    if(event === 'input'){
+  game.on = (socket) => {
+    socket.on('input', (data) => {
       gameModifications.forEach(({input}) => {
         if(input) input(socket.user, data)
       })
-    }
-    if(event === 'ask for init game state'){
+    })
+    socket.on('ask for init game state', (data) => {
       socket.emit('init game', game.itemList)
-    }
+    })
+    socket.on('ask for log history', (data) => {
+      socket.emit('log history', game.logs)
+    })
+    socket.on('send logs', (data) => {
+      io.emit('new logs', [data])
+    })
   }
 
   return game

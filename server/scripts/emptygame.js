@@ -10,6 +10,7 @@ mongoose
     const gameState = await GameState.findOne({_id: config.currentGameStateId})
     const itemList = [];
     gameState.itemList = [];
+    gameState.logs = [];
     gameState.save().then((game) => {
       console.log('initialized ' + game.itemList.length + ' game items')
     }).catch(e => console.log(e));

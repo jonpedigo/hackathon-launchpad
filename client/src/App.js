@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 import { useCookies } from 'react-cookie'
 import Login from "./Login";
-import Sample from "./sample";
+import Map from "./map";
+import Chat from "./chat";
 
 if (window.location.origin.indexOf('localhost') > 0) {
   window.socket = io.connect('http://localhost:3000');
@@ -43,7 +44,10 @@ function App() {
   };
 
   if (window.user) {
-    return <Sample/>
+    return <div>
+      <Map/>
+      <Chat/>
+    </div>
   }
 
   if (!state.checkingCookie) {

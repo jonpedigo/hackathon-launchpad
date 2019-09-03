@@ -27,12 +27,8 @@ function shouldClientUpdateGameItem(oldItem, updatedItem) {
 
   // If number of properties is different,
   // objects are not equivalent so client should update
-  // if(updatedItem.tags[0] === 'tree'){
-  //   console.log(aProps.length, bProps.length)
-  // }
   if (aProps.length != bProps.length) {
-    console.log('new property added to', oldItem, updatedItem);
-
+    // console.log('new property added to', oldItem, updatedItem);
     return true;
   }
 
@@ -48,7 +44,7 @@ function shouldClientUpdateGameItem(oldItem, updatedItem) {
     // If values of same property are not equal,
     // objects are not equivalent and client should update
     if (oldItem[propName] !== updatedItem[propName]) {
-      console.log(`${propName} has changed from ${oldItem[propName]} to ${updatedItem[propName]} on item named ${updatedItem.name}`)
+      // console.log(`${propName} has changed from ${oldItem[propName]} to ${updatedItem[propName]} on item named ${updatedItem.name}`)
       return true;
     }
   }
@@ -91,7 +87,8 @@ module.exports = function(game = {}){
   function init(gameState){
     game.id = gameState.id
     game.itemList = gameState.itemList
-    game.updates = []
+    game.logs = gameState.logs
+    game.logs.push('testing')
 
     const { items, tags } = _generateItemLookupAndTags(game)
     game.items = items

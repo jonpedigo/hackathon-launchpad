@@ -32,6 +32,7 @@ const initGameItem = ({gameItem, textures, stage}) => {
     sprite.transform.scale.x = 5
     sprite.transform.scale.y = 5
     sprite.name = gameItem.name
+    sprite.oldSprite = gameItem.sprite
     stage.addChild(sprite)
   } else if (gameItem.character) {
     let text = new PIXI.Text(gameItem.character, {fontFamily : 'Courier New', fontSize: GRID_SIZE, fill : '#ff1010', align : 'center'})
@@ -41,14 +42,19 @@ const initGameItem = ({gameItem, textures, stage}) => {
   }
 }
 
-const updateGameItem = ({gameItem, texture, stage}) => {
+const updateGameItem = ({gameItem, textures, stage}) => {
   const pixiChild = stage.getChildByName(gameItem.name)
+  if(!pixiChild) return
 
   // remove if its invisible now
   if (gameItem.invisible){
-    if(pixiChild){
-      stage.removeChild(pixiChild)
-    }
+    stage.removeChild(pixiChild)
+    return
+  }
+
+  if(gameItem.sprite != pixiChild.texture){
+    stage.removeChild(pixiChild)
+    initGameItem({gameItem, textures, stage})
     return
   }
 
