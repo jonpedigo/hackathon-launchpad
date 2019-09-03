@@ -17,7 +17,7 @@ function onLoad({app, textures, pixiItems}){
   })
 }
 
-export default function Sample() {
+export default function Map() {
   const canvasRef = useRef(null)
 
   useEffect(() => {

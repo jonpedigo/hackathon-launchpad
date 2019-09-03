@@ -50,22 +50,22 @@ module.exports = function(game){
   }
 
   function setup(){
-    game.tags.tree.forEach((tree) => {
-      tree.destroy = function(){
-        tree.dead = true
-        tree.invisible = true
-      }
-    })
+    // game.tags.tree.forEach((tree) => {
+    //   tree.destroy = function(){
+    //     tree.dead = true
+    //     tree.invisible = true
+    //   }
+    // })
   }
 
   function update(delta){
-    game.tags.tree.forEach((tree) => {
-      if(!tree.dead){
-        if(tree._hp) tree._hp--
-        else tree._hp = 10
-        if(tree._hp <= 0) tree.destroy()
-      }
-    })
+    // game.tags.tree.forEach((tree) => {
+    //   if(!tree.dead){
+    //     if(tree._hp) tree._hp--
+    //     else tree._hp = 10
+    //     if(tree._hp <= 0) tree.destroy()
+    //   }
+    // })
   }
 
   return {

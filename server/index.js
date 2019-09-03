@@ -86,7 +86,7 @@ const authenticate = async (socket, data, callback) => {
 // start game
 game(io).then((game) => {
   const postAuthenticate = socket => {
-    socket.emit('authenticated', jwt.sign(socket.user.username, 'secret-words'))
+    socket.emit('authenticated', {cookie: jwt.sign(socket.user.username, 'secret-words'), user: socket.user})
     game.on(socket)
   }
 

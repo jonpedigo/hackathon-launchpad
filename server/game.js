@@ -55,7 +55,7 @@ module.exports = async function(io){
     gameState.save().then(() => {
       console.log('game ' + gameState.id + ' saved')
     }).catch((e) => console.log('failed to save', e))
-  }, 60000)
+  }, 600000)
 
   //listen for events
   game.on = (socket) => {
@@ -68,10 +68,11 @@ module.exports = async function(io){
       socket.emit('init game', game.itemList)
     })
     socket.on('ask for log history', (data) => {
-      socket.emit('log history', game.logs)
+      socket.emit('new logs', game.logs)
     })
-    socket.on('send logs', (data) => {
-      io.emit('new logs', [data])
+    socket.on('add log', (data) => {
+      game.logs.push(data)
+      io.emit('new logs', game.logs)
     })
   }
 

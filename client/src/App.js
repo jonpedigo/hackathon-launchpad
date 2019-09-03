@@ -3,7 +3,7 @@ import io from "socket.io-client";
 import { useCookies } from 'react-cookie'
 import Login from "./Login";
 import Map from "./map";
-import Chat from "./chat";
+import Logs from "./logs";
 
 if (window.location.origin.indexOf('localhost') > 0) {
   window.socket = io.connect('http://localhost:3000');
@@ -21,10 +21,13 @@ function App() {
     }
   }, [])
 
-  window.socket.on("authenticated", (user) => {
-    setCookie('user', user, { path: '/' });
-    window.user = user;
-    setState({...state, checkingCookie: false});
+  window.socket.on("authenticated", ({cookie, user}) => {
+    // for some reason this gets called a couple times even when user is false..
+    if (user) {
+      setCookie('user', cookie, { path: '/' });
+      window.user = user;
+      setState({...state, checkingCookie: false});
+    }
   });
 
   window.socket.on("auth_message", ({ message }) => {
@@ -46,7 +49,7 @@ function App() {
   if (window.user) {
     return <div>
       <Map/>
-      <Chat/>
+      <Logs user={window.user}/>
     </div>
   }
 
