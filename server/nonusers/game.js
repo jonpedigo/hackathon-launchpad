@@ -1,7 +1,9 @@
 // DESCRIPTION: define parameters of the game world, add core functions to game object
 
-// TODO: My first character! the woodcutter
-// TODO: Chat sytem
+// TODO: My first character! the woodcutter... pathfinding
+
+// TODO: standards for flags, tags, and other variables, x, y, z, name, etc. Write down what they all mean
+
 /*
 
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -88,7 +90,7 @@ module.exports = function(game = {}){
     game.id = gameState.id
     game.itemList = gameState.itemList
     game.logs = gameState.logs
-    
+
     const { items, tags } = _generateItemLookupAndTags(game)
     game.items = items
     game.tags = tags

@@ -11,6 +11,7 @@ const initPixiApp = ({canvasRef, onLoad}) => {
   // init pixi app and textures
   const textures = {};
   const app = new PIXI.Application({ view: canvasRef.current, width: STAGE_WIDTH, height: STAGE_HEIGHT })
+  app.stage.sortableChildren = true
 
   app.loader.add('static/img/tileset.png').load(() => {
     tileset.forEach((tile) => {
@@ -33,11 +34,13 @@ const initGameItem = ({gameItem, textures, stage}) => {
     sprite.transform.scale.y = 5
     sprite.name = gameItem.name
     sprite.oldSprite = gameItem.sprite
+    sprite.zIndex = gameItem.z
     stage.addChild(sprite)
   } else if (gameItem.character) {
     let text = new PIXI.Text(gameItem.character, {fontFamily : 'Courier New', fontSize: GRID_SIZE, fill : '#ff1010', align : 'center'})
     text.transform.position.x = (gameItem.x * GRID_SIZE)
     text.transform.position.y = (gameItem.y * GRID_SIZE)
+    text.zIndex = gameItem.z
     stage.addChild(text)
   }
 }

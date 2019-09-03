@@ -27,17 +27,19 @@ module.exports = function(game){
       items.push({
         x: x,
         y: y,
+        z: 0,
         character: 'G',
         sprite: 'grass-1',
         color: 'green',
         name: `grass_x${x}y${y}`,
         hard: false,
-        tags: ['grass']
+        tags: ['grass'],
       })
       if(Math.random() > .7){
         items.push({
           x: x,
           y: y,
+          z: 1,
           character: 'T',
           sprite: 'tree-1',
           color: 'green',
