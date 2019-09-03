@@ -30,8 +30,9 @@ module.exports = function(game){
         character: 'G',
         sprite: 'grass-1',
         color: 'green',
-        name: 'grass-' + (x + y),
+        name: `grass_x${x}y${y}`,
         hard: false,
+        tags: ['grass']
       })
       if(Math.random() > .7){
         items.push({
@@ -40,21 +41,32 @@ module.exports = function(game){
           character: 'T',
           sprite: 'tree-1',
           color: 'green',
-          name: 'tree-' + (x + y),
+          name: `tree_x${x}y${y}`,
           hard: true,
+          tags: ['tree'],
         })
       }
     })
   }
 
   function setup(){
-
+    game.tags.tree.forEach((tree) => {
+      tree.destroy = function(){
+        tree.dead = true
+        tree.invisible = true
+      }
+    })
   }
 
   function update(delta){
-
+    game.tags.tree.forEach((tree) => {
+      if(!tree.dead){
+        if(tree._hp) tree._hp--
+        else tree._hp = 10
+        if(tree._hp <= 0) tree.destroy()
+      }
+    })
   }
-
 
   return {
     init,

@@ -1,9 +1,7 @@
 // DESCRIPTION: define parameters of the game world, add core functions to game object
 
-// TODO: The concept of time and death
-// TODO: Tag system
 // TODO: My first character! the woodcutter
-
+// TODO: Chat sytem
 /*
 
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -22,6 +20,61 @@ function forEveryGridNode(game, fx) {
   })
 }
 
+function shouldClientUpdateGameItem(oldItem, updatedItem) {
+  // Create arrays of property names
+  var aProps = Object.getOwnPropertyNames(oldItem);
+  var bProps = Object.getOwnPropertyNames(updatedItem);
+
+  // If number of properties is different,
+  // objects are not equivalent so client should update
+  // if(updatedItem.tags[0] === 'tree'){
+  //   console.log(aProps.length, bProps.length)
+  // }
+  if (aProps.length != bProps.length) {
+    console.log('new property added to', oldItem, updatedItem);
+
+    return true;
+  }
+
+  for (var i = 0; i < aProps.length; i++) {
+    var propName = aProps[i];
+
+    // dont check private properties
+    if(propName.charAt(0) === '_') continue
+
+    // no need to reupdate when fx are initialized in setup
+    if(typeof oldItem[propName] === 'function') continue
+
+    // If values of same property are not equal,
+    // objects are not equivalent and client should update
+    if (oldItem[propName] !== updatedItem[propName]) {
+      console.log(`${propName} has changed from ${oldItem[propName]} to ${updatedItem[propName]} on item named ${updatedItem.name}`)
+      return true;
+    }
+  }
+}
+
+function generateGameItemUpdate(oldItemList, updatedItemLookup, updatedItemList){
+  const updated = []
+
+  for (let i = 0; i < oldItemList.length; i++) {
+    const updatedItem = updatedItemLookup[oldItemList[i].name]
+    if (shouldClientUpdateGameItem(oldItemList[i], updatedItem)) {
+      updated.push(updatedItem)
+    }
+  }
+
+  let created = []
+  if (updatedItemList.length > oldItemList){
+    created = updatedItemList.slice(oldItemList.length)
+  }
+
+  return {
+    updated,
+    created,
+  }
+}
+
 /*
 
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -32,19 +85,17 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 */
 
-module.exports = function(game){
+module.exports = function(game = {}){
 
   // non standard init for game
   function init(gameState){
-    const game = {
-      id: gameState.id,
-      itemList: gameState.itemList,
-      items: gameState.itemList.reduce((obj, item) => {
-        obj[item.name] = item
-        return obj
-      }, {}),
-      updates: [],
-    }
+    game.id = gameState.id
+    game.itemList = gameState.itemList
+    game.updates = []
+
+    const { items, tags } = _generateItemLookupAndTags(game)
+    game.items = items
+    game.tags = tags
 
     // game.width = _findFurthestCoordinate(game, 'x') + 10
     // game.height = _findFurthestCoordinate(game, 'y') + 10
@@ -53,6 +104,7 @@ module.exports = function(game){
     game.grid = _createGrid(game)
     game.pathfindingGrid = _convertGridToPathfindingGrid(game.grid)
     game.forEveryGridNode = forEveryGridNode
+    game.generateGameItemUpdate = generateGameItemUpdate
 
     return game
   }
@@ -64,6 +116,9 @@ module.exports = function(game){
   function update(delta){
     game.grid = _createGrid(game)
     game.pathfindingGrid = _convertGridToPathfindingGrid(game.grid)
+    const { items, tags } = _generateItemLookupAndTags(game)
+    game.items = items
+    game.tags = tags
   }
 
   return {
@@ -130,4 +185,19 @@ function _convertGridToPathfindingGrid(grid) {
   }
 
   return pathfindingGrid;
+}
+
+
+function _generateItemLookupAndTags(game){
+  return game.itemList.reduce((obj, item) => {
+    obj.items[item.name] = item
+    item.tags.forEach((tag) => {
+      if(obj.tags[tag]){
+        obj.tags[tag].push(item)
+      } else {
+        obj.tags[tag] = [item]
+      }
+    })
+    return obj
+  }, { items: {}, tags: {} })
 }

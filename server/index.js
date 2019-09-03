@@ -7,7 +7,7 @@ const game = require('./game')
 const config = require('./config')
 
 // Start it up!
-const port = process.env.PORT || 4000
+const port = process.env.PORT || 3000
 const logger = () => console.log(`Listening: ${port}`)
 const server = app.listen(port)
 
@@ -46,10 +46,10 @@ const authenticate = async (socket, data, callback) => {
           const user = await User.findOne({ username })
           if (!user) {
             socket.emit('auth_message', { message: 'No such username and password combination'})
-            return
+          } else {
+            socket.user = user
+            return callback(null, !!user)
           }
-          socket.user = user
-          return callback(null, !!user)
         }
       }
     }
@@ -90,6 +90,9 @@ game(io).then((game) => {
 
     socket.on('input', data => {
       game.on(socket, 'input', data)
+    })
+    socket.on('ask for init game state', data => {
+      game.on(socket, 'ask for init game state', data)
     })
   }
 

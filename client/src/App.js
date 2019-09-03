@@ -5,7 +5,7 @@ import Login from "./Login";
 import Sample from "./sample";
 
 if (window.location.origin.indexOf('localhost') > 0) {
-  window.socket = io.connect('http://localhost:4000');
+  window.socket = io.connect('http://localhost:3000');
 } else {
   window.socket = io.connect();
 }

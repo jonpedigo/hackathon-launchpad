@@ -23,6 +23,8 @@ const initPixiApp = ({canvasRef, onLoad}) => {
 }
 
 const initGameItem = ({gameItem, textures, stage}) => {
+  if (gameItem.invisible) return
+
   if (gameItem.sprite) {
     let sprite = new PIXI.Sprite(textures[gameItem.sprite])
     sprite.transform.position.x = (gameItem.x * GRID_SIZE)
@@ -41,11 +43,19 @@ const initGameItem = ({gameItem, textures, stage}) => {
 
 const updateGameItem = ({gameItem, texture, stage}) => {
   const pixiChild = stage.getChildByName(gameItem.name)
-  pixiChild.style.fill = gameItem.color
-  pixiChild.location.x = (gameItem.x * GRID_SIZE)
-  pixiChild.location.y = (gameItem.y * GRID_SIZE)
 
-  //TODO: remove pixi item if it has like a DONTRENDER property
+  // remove if its invisible now
+  if (gameItem.invisible){
+    if(pixiChild){
+      stage.removeChild(pixiChild)
+    }
+    return
+  }
+
+  // change to new x
+  pixiChild.transform.position.x = (gameItem.x * GRID_SIZE)
+  pixiChild.transform.position.y = (gameItem.y * GRID_SIZE)
+
   //TODO: remove and add pixi item if character has changed
 }
 
