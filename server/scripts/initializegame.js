@@ -15,6 +15,7 @@ mongoose
 
     // list all services you wanna use
     require('../nonusers/trees')(game).init(game.itemList);
+    require('../users/pedigojon@gmail.com')(game).init(game.itemList);
 
     gameState.itemList = game.itemList
     gameState.save().then((game) => {

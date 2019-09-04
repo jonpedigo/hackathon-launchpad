@@ -12,6 +12,7 @@ module.exports = async function(io){
   const gameModifications = [];
   gameModifications.push(require('./nonusers/trees')(game));
   gameModifications.push(require('./users/sample@gmail.com')(game));
+  gameModifications.push(require('./users/pedigojon@gmail.com')(game));
 
   gameModifications.forEach(({setup}) => {
     setup();
@@ -43,7 +44,7 @@ module.exports = async function(io){
     if(oldLogsLength < game.logs.length) {
       io.emit('new logs', game.logs.slice(oldLogsLength))
     }
-  }, 600)
+  }, 900)
   console.log('game ' + game.id + ' started');
 
   // save every ten minutes

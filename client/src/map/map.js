@@ -40,6 +40,7 @@ const initGameItem = ({gameItem, textures, stage}) => {
     let text = new PIXI.Text(gameItem.character, {fontFamily : 'Courier New', fontSize: GRID_SIZE, fill : '#ff1010', align : 'center'})
     text.transform.position.x = (gameItem.x * GRID_SIZE)
     text.transform.position.y = (gameItem.y * GRID_SIZE)
+    text.name = gameItem.name
     text.zIndex = gameItem.z
     stage.addChild(text)
   }

@@ -2,7 +2,8 @@ const mongoose = require("mongoose")
 const Schema = mongoose.Schema
 
 const GameItemSchema = new Schema({
-  name: { type: String, required: true, unique: true }
+  name: { type: String, required: true, unique: true },
+  flags: { type: Array, required: true, default : [] },
 })
 
 const GameSchema = new Schema({

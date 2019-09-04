@@ -32,7 +32,6 @@ module.exports = function(game){
         character: 'G',
         sprite: 'grass-1',
         color: 'green',
-        flags: {},
         tags: ['grass'],
       })
       if(Math.random() > .7){
@@ -44,9 +43,7 @@ module.exports = function(game){
           character: 'T',
           sprite: 'tree-1',
           color: 'green',
-          flags: {
-            hard: true,
-          },
+          hard: true,
           tags: ['tree'],
         })
       }

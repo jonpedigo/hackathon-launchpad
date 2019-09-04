@@ -4,7 +4,10 @@
 
 // TODO: standards for flags, tags, and other variables, x, y, z, name, etc. Write down what they all mean
 
+const PF = require('pathfinding');
+
 /*
+
 
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -73,6 +76,110 @@ function generateGameItemUpdate(oldItemList, updatedItemLookup, updatedItemList)
   }
 }
 
+function findOpenGridNear(game, x, y, level = 0){
+  if(level == 0) {
+    game.pathfindingGrid = _convertGridToPathfindingGrid(game.grid)
+  }
+
+  if(isGridWalkable(game, x, y)) return { x, y }
+
+  const nearbyGrids = [
+    { x, y: y-1},
+    { x: x+1, y: y-1},
+    { x: x+1, y},
+    { x: x+1, y: y+1},
+    { x: x, y: y+1},
+    { x: x-1, y: y+1},
+    { x: x-1, y},
+    { x: x-1, y: y-1},
+  ]
+
+  for (let i = 0; i < nearbyGrids.length; i++) {
+    let { x, y } = nearbyGrids[i]
+    if(isGridWalkable(game, x, y)) return nearbyGrids[i]
+  }
+
+  console.log('failed to find nearby grid for object going recursive..')
+  const nextGrid = nearbyGrids[Math.random() * nearbyGrids.length]
+  findOpenGridNear(game, nextGrid.x, nextGrid.y, level++)
+}
+
+function isGridWalkable(game, x, y) {
+  if(!game.pathfindingGrid.nodes[y]) return false
+  if(!game.pathfindingGrid.nodes[y][x]) return false
+  if(!game.pathfindingGrid.nodes[y][x].walkable) return false
+  return true
+}
+
+function walkAround(game, obj, { intelligence } ) {
+  const { x, y } = obj
+
+  let direction = ''
+  if(intelligence == 'basic') {
+    if(obj._direction) {
+      direction = obj._direction
+    }
+  }
+
+  if(Math.random() > .5){
+    // go right
+    if(Math.random() > .5 && direction !=='left'){
+      if ( isGridWalkable(game, x + 1, y) ){
+        if (intelligence == 'basic') obj._direction = 'right'
+        return { x: x + 1, y: y}
+      }
+    }
+
+    // go left
+    if(direction !== 'right') {
+      if ( isGridWalkable(game, x - 1, y) ) {
+        if (intelligence == 'basic') obj._direction = 'left'
+        return { x: x - 1, y: y}
+      }
+    }
+  }
+
+  // go down
+  if(Math.random() > .5 && direction !== 'up'){
+    if ( isGridWalkable(game, x, y + 1) ){
+      if (intelligence == 'basic') obj._direction = 'down'
+      return { x: x, y: y + 1}
+    }
+  }
+
+  // go up
+  if(direction !== 'down') {
+    if ( isGridWalkable(game, x, y - 1) ){
+      if (intelligence == 'basic') obj._direction = 'up'
+      return { x: x, y: y - 1}
+    }
+  }
+
+  // random failed, find somewhere to move
+  obj._direction = ''
+//  console.log('couldnt do rando')
+  const nearbyGrids = [
+    { x, y: y-1},
+    { x: x+1, y},
+    { x: x, y: y+1},
+    { x: x-1, y},
+  ]
+
+  if(Math.random() > .5){
+    nearbyGrids.reverse()
+  }
+
+  for (let i = 0; i < nearbyGrids.length; i++) {
+    let { x, y } = nearbyGrids[i]
+    if (isGridWalkable(game, nearbyGrids[i].x, nearbyGrids[i].y)) {
+      return nearbyGrids[i]
+    }
+  }
+
+  console.log('found nowhere to move')
+  return { x, y }
+}
+
 /*
 
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -101,9 +208,10 @@ module.exports = function(game = {}){
     game.height = 100
     game.grid = _createGrid(game)
     game.pathfindingGrid = _convertGridToPathfindingGrid(game.grid)
+    game.findOpenGridNear = findOpenGridNear
     game.forEveryGridNode = forEveryGridNode
     game.generateGameItemUpdate = generateGameItemUpdate
-
+    game.walkAround = walkAround
     return game
   }
 
@@ -167,24 +275,21 @@ function _createGrid(game){
 }
 
 function _convertGridToPathfindingGrid(grid) {
-  const pathfindingGrid = [];
+  const pfgrid = new PF.Grid(grid.length, grid[0].length);
 
   for (let x = 0; x < grid.length; x++) {
-    pathfindingGrid.push([])
     for (let y = 0; y < grid[x].length; y++) {
-      pathfindingGrid[x].push(0)
       for (let gameItemIndex = 0; gameItemIndex < grid[x][y].length; gameItemIndex++) {
-        if (grid[x][y][gameItemIndex].flags.hard) {
-          pathfindingGrid[x][y] = 1
+        if (grid[x][y][gameItemIndex].hard) {
+          pfgrid.setWalkableAt(x, y, false);
           break;
         }
       }
     }
   }
 
-  return pathfindingGrid;
+  return pfgrid;
 }
-
 
 function _generateItemLookupAndTags(game){
   return game.itemList.reduce((obj, item) => {
