@@ -25,26 +25,28 @@ module.exports = function(game){
   function init(items){
     game.forEveryGridNode(game, (gridNode, x, y) => {
       items.push({
+        name: `grass_x${x}y${y}`,
         x: x,
         y: y,
         z: 0,
         character: 'G',
         sprite: 'grass-1',
         color: 'green',
-        name: `grass_x${x}y${y}`,
-        hard: false,
+        flags: {},
         tags: ['grass'],
       })
       if(Math.random() > .7){
         items.push({
+          name: `tree_x${x}y${y}`,
           x: x,
           y: y,
           z: 1,
           character: 'T',
           sprite: 'tree-1',
           color: 'green',
-          name: `tree_x${x}y${y}`,
-          hard: true,
+          flags: {
+            hard: true,
+          },
           tags: ['tree'],
         })
       }

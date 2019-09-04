@@ -174,7 +174,7 @@ function _convertGridToPathfindingGrid(grid) {
     for (let y = 0; y < grid[x].length; y++) {
       pathfindingGrid[x].push(0)
       for (let gameItemIndex = 0; gameItemIndex < grid[x][y].length; gameItemIndex++) {
-        if (grid[x][y][gameItemIndex].hard) {
+        if (grid[x][y][gameItemIndex].flags.hard) {
           pathfindingGrid[x][y] = 1
           break;
         }
