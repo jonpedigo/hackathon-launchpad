@@ -43,7 +43,7 @@ module.exports = function(game){
           character: 'T',
           sprite: 'tree-1',
           color: 'green',
-          hard: true,
+          obstacle: true,
           tags: ['tree'],
         })
       }
@@ -52,10 +52,7 @@ module.exports = function(game){
 
   function setup(){
     // game.tags.tree.forEach((tree) => {
-    //   tree.destroy = function(){
-    //     tree.dead = true
-    //     tree.invisible = true
-    //   }
+    //   tree._life = 10
     // })
   }
 

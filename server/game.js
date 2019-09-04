@@ -22,6 +22,8 @@ module.exports = async function(io){
   // start game
   let previousUpdateTime = Date.now()
   setInterval(() => {
+    let start = Date.now()
+
     // store current game state and log length
     let oldLogsLength = game.logs.length
     let oldItemList = game.itemList.map((gameItem) => {
@@ -44,7 +46,8 @@ module.exports = async function(io){
     if(oldLogsLength < game.logs.length) {
       io.emit('new logs', game.logs.slice(oldLogsLength))
     }
-  }, 900)
+    console.log('processed game loop in ' + (Date.now() - start) + 'ms')
+  }, 2000)
   console.log('game ' + game.id + ' started');
 
   // save every ten minutes

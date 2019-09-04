@@ -26,8 +26,6 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 */
 
 module.exports = function(game){
-
-  let currentPath = []
   let entarkia = null
 
   // add all items to databas
@@ -39,6 +37,7 @@ module.exports = function(game){
       x,
       y,
       z: 2,
+      _life: 100,
       character: 'E',
       tags: ['human'],
       color: 'brown',
@@ -52,23 +51,14 @@ module.exports = function(game){
     // runs every time server is started
   function setup(){
     entarkia = game.items.entarkia
+    game.registerMod(game, 'dat mothafucka', _move)
+    // game.addUpdate(game, { name: 'dat mothafucka', duration: 10 }, entarkia)
   }
 
   // trigger, collisions
     // runs every update about 100 milliseconds
   function update(delta){
-    // if(!currentPath.length) {
-    //   currentPath = finder.findPath(entarkia.x, entarkia.y, 4, 2, game.pathfindingGrid);
-    // }
-    if (currentPath.length) {
-      let [nextX, nextY] = currentPath.shift()
-      entarkia.x = nextX
-      entarkia.y = nextY
-    }
 
-    const { x, y } = game.walkAround(game, entarkia, { intelligence: 'basic'})
-    entarkia.x = x
-    entarkia.y = y
   }
 
   // on player input
@@ -93,3 +83,23 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 */
+
+
+// a core update function
+function _move(game, delta) {
+  console.log(this)
+  // if(!currentPath.length) {
+  //   currentPath = finder.findPath(entarkia.x, entarkia.y, 4, 2, game.pathfindingGrid);
+  // }
+  if (this._currentPath && is._currentPath.length) {
+    let [nextX, nextY] = this._currentPath.shift()
+    this.x = nextX
+    this.y = nextY
+  }
+
+  if(Math.random() > .3) {
+    let { x, y } = game.walkAround(game, this, { intelligence: 'basic'})
+    this.x = x
+    this.y = y
+  }
+}

@@ -4,6 +4,12 @@
 
 // TODO: standards for flags, tags, and other variables, x, y, z, name, etc. Write down what they all mean
 
+// TODO: Test mod system
+
+// TODO: The FEELING OF TIME NEEDS TO BE ENHANCED. every stroke of the clock
+
+// TODO: intelligence, strength, charisma
+
 const PF = require('pathfinding');
 
 /*
@@ -30,6 +36,23 @@ function shouldClientUpdateGameItem(oldItem, updatedItem) {
   var aProps = Object.getOwnPropertyNames(oldItem);
   var bProps = Object.getOwnPropertyNames(updatedItem);
 
+  aProps.filter((propName) => {
+    // no need to update when fx are initialized in setup
+    if(typeof oldItem[propName] === 'function') return false
+    // dont update when we add a _ item
+    if(propName.charAt(0) === '_') return false
+    return true
+  })
+
+  bProps.filter((propName) => {
+    // no need to update when fx are initialized in setup
+    if(typeof updatedItem[propName] === 'function') return false
+    // dont update when we add a _ item
+    if(propName.charAt(0) === '_') return false
+    return true
+  })
+
+
   // If number of properties is different,
   // objects are not equivalent so client should update
   if (aProps.length != bProps.length) {
@@ -42,9 +65,6 @@ function shouldClientUpdateGameItem(oldItem, updatedItem) {
 
     // dont check private properties
     if(propName.charAt(0) === '_') continue
-
-    // no need to reupdate when fx are initialized in setup
-    if(typeof oldItem[propName] === 'function') continue
 
     // If values of same property are not equal,
     // objects are not equivalent and client should update
@@ -157,7 +177,7 @@ function walkAround(game, obj, { intelligence } ) {
 
   // random failed, find somewhere to move
   obj._direction = ''
-//  console.log('couldnt do rando')
+  // console.log('couldnt do rando movement, finding space')
   const nearbyGrids = [
     { x, y: y-1},
     { x: x+1, y},
@@ -180,6 +200,61 @@ function walkAround(game, obj, { intelligence } ) {
   return { x, y }
 }
 
+function addUpdate(game, {name, core, hijack = false, duration = 10}, subject) {
+  if(!subject.updates) subject.updates = []
+
+  // for normal ass controlled updates...
+  if(core) {
+    const update = {
+      core: core.bind(subject, game),
+    }
+    subject.updates.push(update)
+  }
+
+  // for crazy ass mods you get from other people
+  if(name) {
+    const mod = game.itemMods[name]
+    const update = {
+      name,
+      mod: mod.bind(subject, game),
+      hijack,
+      duration,
+    }
+
+    if(hijack) {
+      subject.updates.unshift(update)
+    }
+
+    for(let i = 0; i < subject.updates.length; i++){
+      if(subject.updates[i].name === name){
+        if(!subject.updates[i].mod){
+          subject.updates[i] = update
+        } else {
+          console.log(`subject ${subject.name} already has update ${name}`)
+        }
+        // already exists on subject so were good, dont push or anything
+        return
+      }
+    }
+
+    subject.updates.push(update)
+  }
+}
+
+function removeUpdate(game, name, subject) {
+  for(let i = 0; i < subject.updates.length; i++){
+    if(subject.updates[i].name === name){
+      subject.updates.splice(i, 1)
+    }
+    return
+  }
+}
+
+function registerMod(game, name, fx) {
+  if(game.itemMods[name]) return console.log(`mod ${name} already registered`)
+  game.itemMods[name] = fx
+}
+
 /*
 
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -197,6 +272,7 @@ module.exports = function(game = {}){
     game.id = gameState.id
     game.itemList = gameState.itemList
     game.logs = gameState.logs
+    game.itemMods = {}
 
     const { items, tags } = _generateItemLookupAndTags(game)
     game.items = items
@@ -206,17 +282,39 @@ module.exports = function(game = {}){
     // game.height = _findFurthestCoordinate(game, 'y') + 10
     game.width = 100
     game.height = 100
+
+    // something might want this...
+    game.forEveryGridNode = forEveryGridNode
+
+    // pathfinding
     game.grid = _createGrid(game)
     game.pathfindingGrid = _convertGridToPathfindingGrid(game.grid)
     game.findOpenGridNear = findOpenGridNear
-    game.forEveryGridNode = forEveryGridNode
-    game.generateGameItemUpdate = generateGameItemUpdate
     game.walkAround = walkAround
+
+    // client update
+    game.generateGameItemUpdate = generateGameItemUpdate
+
+    // mods/server updates
+    game.addUpdate = addUpdate
+    game.registerMod = registerMod
+    game.removeUpdate = removeUpdate
+
     return game
   }
 
   function setup(){
-
+    //re initialize mods
+    for(let i = 0; i < game.itemList.length; i++) {
+      let gameItem = game.itemList[i]
+      if(gameItem.updates){
+        for(let j = 0; j < gameItem.updates.length; j++) {
+          let update = gameItem.updates[j]
+          addUpdate(game, update, gameItem)
+          j++
+        }
+      }
+    }
   }
 
   function update(delta){
@@ -225,6 +323,39 @@ module.exports = function(game = {}){
     const { items, tags } = _generateItemLookupAndTags(game)
     game.items = items
     game.tags = tags
+
+    for(let i = 0; i < game.itemList.length; i++) {
+      let gameItem = game.itemList[i]
+      gameItem._life--
+
+      if(gameItem._life <= 0) {
+        if(gameItem.destroy) gameItem.destroy()
+        gameItem.dead = true
+        gameItem.color = 'black'
+      }
+
+      if(gameItem._life <= -10) {
+        gameItem.invisible = true
+      }
+
+      if(gameItem.updates){
+        for(let j = 0; j < gameItem.updates.length; j++) {
+          let update = gameItem.updates[j]
+          if(update.mod) {
+            update.duration--
+            if(update.duration <= 0) {
+              gameItem.updates.splice(j, 1)
+              j--
+            }
+            update.mod(delta)
+            // if this update hijacks the subject, no more updates!
+            if(update.hijack) break
+          } else if(update.core) {
+            update.core(delta)
+          }
+        }
+      }
+    }
   }
 
   return {
