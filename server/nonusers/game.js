@@ -1,12 +1,13 @@
 // DESCRIPTION: define parameters of the game world, add core functions to game object
 
-// TODO: My first character! the woodcutter... pathfinding
+// TODO: My first character! the woodcutter
 
 // TODO: standards for flags, tags, and other variables, x, y, z, name, etc. Write down what they all mean
 
-// TODO: Test mod system
+// TODO: The FEELING OF TIME NEEDS TO BE ENHANCED. every stroke of the clock, things should have an age
 
-// TODO: The FEELING OF TIME NEEDS TO BE ENHANCED. every stroke of the clock
+// TODO: When somthing dies, is it removed from the itemList? At what point...
+// I could just make another item list called withered away items
 
 // TODO: intelligence, strength, charisma
 
@@ -86,7 +87,7 @@ function generateGameItemUpdate(oldItemList, updatedItemLookup, updatedItemList)
   }
 
   let created = []
-  if (updatedItemList.length > oldItemList){
+  if (updatedItemList.length > oldItemList.length){
     created = updatedItemList.slice(oldItemList.length)
   }
 
@@ -94,6 +95,51 @@ function generateGameItemUpdate(oldItemList, updatedItemLookup, updatedItemList)
     updated,
     created,
   }
+}
+
+function findItemNearby(game, x, y, tags) {
+  if(!Array.isArray(tags)) tags = [tags]
+
+  let matchingItems = getGameItemsFromGridByTags(game, x, y, tags)
+  if (matchingItems.length) {
+    return matchingItems
+  }
+
+  const nearbyGrids = [
+    { x, y: y-1},
+    { x: x+1, y: y-1},
+    { x: x+1, y},
+    { x: x+1, y: y+1},
+    { x: x, y: y+1},
+    { x: x-1, y: y+1},
+    { x: x-1, y},
+    { x: x-1, y: y-1},
+  ]
+
+  for (let i = 0; i < nearbyGrids.length; i++) {
+    let { x, y } = nearbyGrids[i]
+    let matchingItems = getGameItemsFromGridByTags(game, x, y, tags)
+    if(matchingItems.length) return matchingItems
+  }
+
+  console.log(`found no items of tag ${tags} nearby x:${x}y:${y}`)
+  return []
+}
+
+function getGameItemsFromGridByTag(game, x, y, tag) {
+  return game.grid[x][y].filter(({tags}) => {
+    if(!tags) return false
+    return tags.indexOf(tag) >= 0
+  })
+}
+
+function getGameItemsFromGridByTags(game, x, y, tags) {
+  if(!game.grid[x]) return []
+  if(!game.grid[x][y]) return []
+  return game.grid[x][y].filter((item) => {
+    if(!item.tags) return false
+    return tags.some(tag => item.tags.indexOf(tag) >= 0)
+  })
 }
 
 function findOpenGridNear(game, x, y, level = 0){
@@ -200,7 +246,7 @@ function walkAround(game, obj, { intelligence } ) {
   return { x, y }
 }
 
-function addUpdate(game, {name, core, hijack = false, duration = 10}, subject) {
+function addUpdate(game, {name, core, hijack = false, duration = 10, onEnd}, subject) {
   if(!subject.updates) subject.updates = []
 
   // for normal ass controlled updates...
@@ -214,12 +260,15 @@ function addUpdate(game, {name, core, hijack = false, duration = 10}, subject) {
   // for crazy ass mods you get from other people
   if(name) {
     const mod = game.itemMods[name]
+    if(!mod) return console.log(`missing mod ${name} on ${subject.name}`)
     const update = {
       name,
       mod: mod.bind(subject, game),
       hijack,
       duration,
     }
+
+    if(onEnd) update.onEnd = onEnd.bind(subject, game)
 
     if(hijack) {
       subject.updates.unshift(update)
@@ -292,6 +341,9 @@ module.exports = function(game = {}){
     game.findOpenGridNear = findOpenGridNear
     game.walkAround = walkAround
 
+    // item finding
+    game.findItemNearby = findItemNearby
+
     // client update
     game.generateGameItemUpdate = generateGameItemUpdate
 
@@ -304,17 +356,7 @@ module.exports = function(game = {}){
   }
 
   function setup(){
-    //re initialize mods
-    for(let i = 0; i < game.itemList.length; i++) {
-      let gameItem = game.itemList[i]
-      if(gameItem.updates){
-        for(let j = 0; j < gameItem.updates.length; j++) {
-          let update = gameItem.updates[j]
-          addUpdate(game, update, gameItem)
-          j++
-        }
-      }
-    }
+    _initMods(game)
   }
 
   function update(delta){
@@ -326,35 +368,8 @@ module.exports = function(game = {}){
 
     for(let i = 0; i < game.itemList.length; i++) {
       let gameItem = game.itemList[i]
-      gameItem._life--
-
-      if(gameItem._life <= 0) {
-        if(gameItem.destroy) gameItem.destroy()
-        gameItem.dead = true
-        gameItem.color = 'black'
-      }
-
-      if(gameItem._life <= -10) {
-        gameItem.invisible = true
-      }
-
-      if(gameItem.updates){
-        for(let j = 0; j < gameItem.updates.length; j++) {
-          let update = gameItem.updates[j]
-          if(update.mod) {
-            update.duration--
-            if(update.duration <= 0) {
-              gameItem.updates.splice(j, 1)
-              j--
-            }
-            update.mod(delta)
-            // if this update hijacks the subject, no more updates!
-            if(update.hijack) break
-          } else if(update.core) {
-            update.core(delta)
-          }
-        }
-      }
+      _updateGameItemLife(game, gameItem)
+      _updateGameItem(game, gameItem, delta)
     }
   }
 
@@ -375,6 +390,65 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 */
+
+function _updateGameItem(game, gameItem, delta) {
+  if(gameItem.updates){
+    for(let j = 0; j < gameItem.updates.length; j++) {
+      let update = gameItem.updates[j]
+      if(update.mod) {
+        update.duration--
+        if(update.duration <= 0) {
+          if(update.onEnd) update.onEnd()
+          gameItem.updates.splice(j, 1)
+          j--
+        }
+        update.mod(delta)
+        // if this update hijacks the subject, no more updates!
+        if(update.hijack) break
+      } else if(update.core) {
+        update.core(delta)
+      }
+    }
+  }
+}
+
+function _updateGameItemLife(game, gameItem) {
+  gameItem._life = gameItem._life - 1
+
+  if(gameItem._life <= 0) {
+    if(gameItem.destroy) gameItem.destroy()
+    console.log(`${gameItem.name} has died with _life of ${gameItem._life}`)
+    gameItem.dead = true
+    gameItem.invisible = true
+  }
+
+  // let witherPoint = -10
+  // if(gameItem._witherPoint) {
+  //   witherPoint = gameItem._witherPoint
+  // }
+  // if(gameItem._life <= witherPoint) {
+  //   console.log(`${gameItem.name} has withered away completed`)
+  //   gameItem.invisible = true
+  // }
+}
+
+function _initMods(game) {
+  //re initialize mods, but NOT CORES!
+  for(let i = 0; i < game.itemList.length; i++) {
+    let gameItem = game.itemList[i]
+    if(gameItem.updates){
+      for(let j = 0; j < gameItem.updates.length; j++) {
+        let update = gameItem.updates[j]
+        // dont add cores here!
+        // this is just for re initializing mods
+        // mods and core updates are normally added in service files
+        if(update.core) continue;
+        addUpdate(game, update, gameItem)
+        j++
+      }
+    }
+  }
+}
 
 function _findFurthestCoordinate(game, coordinate){
   let furthest = 0;

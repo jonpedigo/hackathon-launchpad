@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js';
 const pixiParticles = require('pixi-particles');
 
 function flameEmitter({startPos, stage, particles = ['https://pixijs.io/pixi-particles-editor/assets/images/particle.png', 'https://pixijs.io/pixi-particles-editor/assets/images/Fire.png'], startEmitting = true}) {
+  console.log(startPos, stage)
   var emitter = new pixiParticles.Emitter(
     stage,
     particles.map(p => PIXI.Texture.from(p)),
@@ -47,8 +48,8 @@ function flameEmitter({startPos, stage, particles = ['https://pixijs.io/pixi-par
     	"emitterLifetime": -1,
     	"maxParticles": 1000,
     	"pos": {
-    		"x": startPos.x,
-    		"y": startPos.y,
+    		"x": startPos.x + 20,
+    		"y": startPos.y + 20,
     	},
     	"addAtBack": false,
     	"spawnType": "circle",

@@ -2,6 +2,7 @@
 
 import * as PIXI from 'pixi.js'
 import tileset from './tileset.json'
+import { flameEmitter } from './particles'
 
 const GRID_SIZE = 40
 const STAGE_WIDTH = window.innerWidth;
@@ -12,7 +13,13 @@ const initPixiApp = ({canvasRef, onLoad}) => {
   const textures = {};
   const app = new PIXI.Application({ view: canvasRef.current, width: STAGE_WIDTH, height: STAGE_HEIGHT })
   app.stage.sortableChildren = true
-
+  app.stage.emitters = []
+  app.ticker.add(function(delta) {
+    // console.log(app.stage)
+    app.stage.emitters.forEach((emitter) => {
+      emitter.update(2 * 0.001);
+    })
+  });
   app.loader.add('static/img/tileset.png').load(() => {
     tileset.forEach((tile) => {
       var baseTexture = new PIXI.BaseTexture('static/img/tileset.png');
@@ -43,6 +50,10 @@ const initGameItem = ({gameItem, textures, stage}) => {
     text.name = gameItem.name
     text.zIndex = gameItem.z
     stage.addChild(text)
+  } else if (gameItem.emitter) {
+    console.log('game item with emitter being added')
+    let emitter = flameEmitter({stage, startPos: {x: gameItem.x * GRID_SIZE, y: gameItem.y * GRID_SIZE }})
+    stage.emitters.push(emitter)
   }
 }
 
@@ -52,6 +63,7 @@ const updateGameItem = ({gameItem, textures, stage}) => {
 
   // remove if its invisible now
   if (gameItem.invisible){
+    console.log('removing because invisible')
     stage.removeChild(pixiChild)
     return
   }

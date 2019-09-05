@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react"
-import { flameEmitter } from './particles'
 import { keyboard } from './input'
 import map from './map'
 import socket from './socket'
