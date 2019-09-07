@@ -7,6 +7,7 @@ module.exports = async function(io){
   const gameState = await GameState.findOne({_id: config.currentGameStateId})
   const gameService = require('./nonusers/game')();
   const game = gameService.init(gameState)
+  if(!game.deadItemList) game.deadItemList = []
 
   // game modifications
   const gameModifications = [];
@@ -53,6 +54,7 @@ module.exports = async function(io){
   // save every ten minutes
   setInterval(() => {
     gameState.itemList = game.itemList
+    gameState.deadItemList = game.deadItemList
     gameState.logs = game.logs
     gameState.markModified('itemList')
     gameState.markModified('logs')

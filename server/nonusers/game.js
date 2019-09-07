@@ -368,8 +368,7 @@ module.exports = function(game = {}){
 
     for(let i = 0; i < game.itemList.length; i++) {
       let gameItem = game.itemList[i]
-      _updateGameItemLife(game, gameItem)
-      _updateGameItem(game, gameItem, delta)
+      _updateGameItem(game, gameItem, i, delta)
     }
   }
 
@@ -391,7 +390,8 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 */
 
-function _updateGameItem(game, gameItem, delta) {
+function _updateGameItem(game, gameItem, i, delta) {
+  _updateGameItemLife(game, gameItem, i)
   if(gameItem.updates){
     for(let j = 0; j < gameItem.updates.length; j++) {
       let update = gameItem.updates[j]
@@ -412,14 +412,15 @@ function _updateGameItem(game, gameItem, delta) {
   }
 }
 
-function _updateGameItemLife(game, gameItem) {
-  gameItem._life = gameItem._life - 1
+function _updateGameItemLife(game, gameItem, index) {
 
+  gameItem._life = gameItem._life - 1
   if(gameItem._life <= 0) {
     if(gameItem.destroy) gameItem.destroy()
     console.log(`${gameItem.name} has died with _life of ${gameItem._life}`)
     gameItem.dead = true
     gameItem.invisible = true
+    game.deadItemList.push(game.itemList.splice(index, 1))
   }
 
   // let witherPoint = -10

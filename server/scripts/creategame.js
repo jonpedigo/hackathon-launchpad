@@ -7,7 +7,7 @@ const mongoUrl = config.mongodb
 
 mongoose
   .connect(mongoUrl, mongoOpts).then(() => {
-    GameState.create({itemList: []}).then((game) => {
+    GameState.create({itemList: [], deadItemList: []}).then((game) => {
       console.log('game created: ', game.id)
     })
   })
