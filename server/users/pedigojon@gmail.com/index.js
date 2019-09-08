@@ -63,6 +63,8 @@ module.exports = function(game){
     // runs every time server is started
   function setup(){
     entarkia = game.items.entarkia
+    console.log(entarkia)
+
     entarkia._behavior = 'look_for_tree'
     game.addUpdate(game, { core: _update }, entarkia)
   }
@@ -114,7 +116,7 @@ function _update(game, delta) {
       this.x = x
       this.y = y
 
-      const nearbyTrees = game.findItemNearby(game, this.x, this.y, ['tree'])
+      const nearbyTrees = game.findItemNearby(game, this.x, this.y, ['tree'], { x: this.x, y: this.y})
       if(nearbyTrees.length){
         // you found a tree! walk towards it
         console.log('beginning walk towards tree')

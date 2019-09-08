@@ -24,6 +24,14 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 */
 
+function sortByDistance(coordsA, coordsB, comparedTo){
+  const diffA = Math.abs(comparedTo.x - coordsA.x) +  Math.abs(comparedTo.y - coordsA.y)
+  const diffB = Math.abs(comparedTo.x - coordsB.x) +  Math.abs(comparedTo.y - coordsB.y)
+  if(diffA < diffB) return -1
+  else if(diffA > diffB)return 1
+  else return 0
+}
+
 function forEveryGridNode(game, fx) {
   game.grid.forEach((row, x) => {
     row.forEach((gridNode, y) => {
@@ -97,7 +105,7 @@ function generateGameItemUpdate(oldItemList, updatedItemLookup, updatedItemList)
   }
 }
 
-function findItemNearby(game, x, y, tags) {
+function findItemNearby(game, x, y, tags, prioritizeNear) {
   if(!Array.isArray(tags)) tags = [tags]
 
   let matchingItems = getGameItemsFromGridByTags(game, x, y, tags)
@@ -115,6 +123,10 @@ function findItemNearby(game, x, y, tags) {
     { x: x-1, y},
     { x: x-1, y: y-1},
   ]
+
+  if(prioritizeNear) {
+    nearbyGrids.sort((a, b) => sortByDistance(a, b, prioritizeNear))
+  }
 
   for (let i = 0; i < nearbyGrids.length; i++) {
     let { x, y } = nearbyGrids[i]
@@ -143,17 +155,13 @@ function getGameItemsFromGridByTags(game, x, y, tags) {
 }
 
 function findOpenPath(game, fromX, fromY, toX, toY, onFail = () => {gameItem._behavior = 'default'}) {
-  const openGrid = findOpenGridNear(game, toX, toY)
-  if(!openGrid) {
-    onFail()
-    return []
-  }
+  const openGrid = findOpenGridNear(game, toX, toY, false, {x: fromX, y: fromY}, onFail)
   return finder.findPath(fromX, fromY, openGrid.x, openGrid.y, game.pathfindingGrid);
 }
 
 // searches nearby grids for open space
 // returns null on fail
-function findOpenGridNear(game, x, y, onlySurrounding = false, onFail = () => {}){
+function findOpenGridNear(game, x, y, onlySurrounding = false, prioritizeNear, onFail = () => {}){
   game.pathfindingGrid = _convertGridToPathfindingGrid(game.grid)
   // console.log('looking for open grid near', x, y)
 
@@ -165,6 +173,10 @@ function findOpenGridNear(game, x, y, onlySurrounding = false, onFail = () => {}
     { x: x, y: y+1},
     { x: x-1, y},
   ]
+
+  if(prioritizeNear) {
+    nearbyGrids.sort((a, b) => sortByDistance(a, b, prioritizeNear))
+  }
 
   for (let i = 0; i < nearbyGrids.length; i++) {
     let { x, y } = nearbyGrids[i]
