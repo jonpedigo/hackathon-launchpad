@@ -22,11 +22,18 @@ const initPixiApp = ({canvasRef, onLoad}) => {
   });
   app.loader.add('static/img/tileset.png').load(() => {
     tileset.forEach((tile) => {
-      var baseTexture = new PIXI.BaseTexture('static/img/tileset.png');
-      var texture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(tile.x, tile.y, tile.width, tile.height));
+      let baseTexture = new PIXI.BaseTexture('static/img/tileset.png');
+      let texture = new PIXI.Texture(baseTexture, new PIXI.Rectangle(tile.x, tile.y, tile.width, tile.height));
+      texture.name = tile.name
       textures[tile.name] = texture
     })
-    onLoad({app, textures})
+
+    app.loader.add('static/img/firepit-1.png').load(() => {
+      let texture = PIXI.Texture.from('static/img/firepit-1.png');
+      texture.name = 'firepit-1'
+      textures['firepit-1'] = texture
+      onLoad({app, textures})
+    })
   })
 }
 
@@ -42,7 +49,12 @@ const initGameItem = ({gameItem, textures, stage}) => {
     sprite.name = gameItem.name
     sprite.oldSprite = gameItem.sprite
     sprite.zIndex = gameItem.z
-    stage.addChild(sprite)
+    const addedChild = stage.addChild(sprite)
+    if (gameItem.emitter) {
+      let emitter = flameEmitter({stage, startPos: {x: gameItem.x * GRID_SIZE, y: gameItem.y * GRID_SIZE }})
+      stage.emitters.push(emitter)
+      addedChild.emitter = emitter
+    }
   } else if (gameItem.character) {
     let text = new PIXI.Text(gameItem.character, {fontFamily : 'Courier New', fontSize: GRID_SIZE, fill : '#ff1010', align : 'center'})
     text.transform.position.x = (gameItem.x * GRID_SIZE)
@@ -50,10 +62,6 @@ const initGameItem = ({gameItem, textures, stage}) => {
     text.name = gameItem.name
     text.zIndex = gameItem.z
     stage.addChild(text)
-  } else if (gameItem.emitter) {
-    console.log('game item with emitter being added')
-    let emitter = flameEmitter({stage, startPos: {x: gameItem.x * GRID_SIZE, y: gameItem.y * GRID_SIZE }})
-    stage.emitters.push(emitter)
   }
 }
 
@@ -63,12 +71,14 @@ const updateGameItem = ({gameItem, textures, stage}) => {
 
   // remove if its invisible now
   if (gameItem.invisible){
+    if(pixiChild.emitter) pixiChild.emitter.emit = false
     console.log('removing because invisible')
     stage.removeChild(pixiChild)
     return
   }
 
-  if(gameItem.sprite != pixiChild.texture){
+  if(gameItem.sprite != pixiChild.texture.name){
+    console.log('sprite-changed')
     stage.removeChild(pixiChild)
     initGameItem({gameItem, textures, stage})
     return

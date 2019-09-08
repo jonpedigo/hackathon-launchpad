@@ -42,13 +42,12 @@ module.exports = async function(io){
     //package and send game state update for server
     const gameItemUpdate = game.generateGameItemUpdate(oldItemList, game.items, game.itemList)
     io.emit('update game', gameItemUpdate)
-
     //send new logs if there are any
     if(oldLogsLength < game.logs.length) {
       io.emit('new logs', game.logs.slice(oldLogsLength))
     }
     console.log('processed game loop in ' + (Date.now() - start) + 'ms')
-  }, 2000)
+  }, Math.round(2000/config.speedModifier))
   console.log('game ' + game.id + ' started');
 
   // save every ten minutes

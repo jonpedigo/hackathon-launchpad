@@ -6,12 +6,12 @@
 
 // TODO: The FEELING OF TIME NEEDS TO BE ENHANCED. every stroke of the clock, things should have an age
 
-// TODO: When somthing dies, is it removed from the itemList? At what point...
-// I could just make another item list called withered away items
-
 // TODO: intelligence, strength, charisma
 
+// TODO Pathfinding overall needs game functions, we need
+
 const PF = require('pathfinding');
+const finder = new PF.AStarFinder();
 
 /*
 
@@ -142,10 +142,49 @@ function getGameItemsFromGridByTags(game, x, y, tags) {
   })
 }
 
-function findOpenGridNear(game, x, y, level = 0){
+function findOpenPath(game, fromX, fromY, toX, toY, onFail = () => {gameItem._behavior = 'default'}) {
+  const openGrid = findOpenGridNear(game, toX, toY)
+  if(!openGrid) {
+    onFail()
+    return []
+  }
+  return finder.findPath(fromX, fromY, openGrid.x, openGrid.y, game.pathfindingGrid);
+}
+
+// searches nearby grids for open space
+// returns null on fail
+function findOpenGridNear(game, x, y, onlySurrounding = false, onFail = () => {}){
+  game.pathfindingGrid = _convertGridToPathfindingGrid(game.grid)
+  // console.log('looking for open grid near', x, y)
+
+  if(!onlySurrounding && isGridWalkable(game, x, y)) return { x, y }
+
+  const nearbyGrids = [
+    { x, y: y-1},
+    { x: x+1, y},
+    { x: x, y: y+1},
+    { x: x-1, y},
+  ]
+
+  for (let i = 0; i < nearbyGrids.length; i++) {
+    let { x, y } = nearbyGrids[i]
+    if(isGridWalkable(game, x, y)) return nearbyGrids[i]
+  }
+
+  console.log('failed to find nearby grid for object');
+  onFail()
+  return null
+}
+
+
+// will search entire map before it gives up.
+// using during runTime could fail
+function forceFindOpenGridNear(game, x, y, level = 0){
   if(level == 0) {
     game.pathfindingGrid = _convertGridToPathfindingGrid(game.grid)
   }
+
+  console.log('looking for open grid near', x, y)
 
   if(isGridWalkable(game, x, y)) return { x, y }
 
@@ -167,7 +206,7 @@ function findOpenGridNear(game, x, y, level = 0){
 
   console.log('failed to find nearby grid for object going recursive..')
   const nextGrid = nearbyGrids[Math.random() * nearbyGrids.length]
-  findOpenGridNear(game, nextGrid.x, nextGrid.y, level++)
+  forceFindOpenGridNear(game, nextGrid.x, nextGrid.y, level++)
 }
 
 function isGridWalkable(game, x, y) {
@@ -340,6 +379,7 @@ module.exports = function(game = {}){
     game.pathfindingGrid = _convertGridToPathfindingGrid(game.grid)
     game.findOpenGridNear = findOpenGridNear
     game.walkAround = walkAround
+    game.findOpenPath = findOpenPath
 
     // item finding
     game.findItemNearby = findItemNearby
@@ -486,7 +526,7 @@ function _convertGridToPathfindingGrid(grid) {
   for (let x = 0; x < grid.length; x++) {
     for (let y = 0; y < grid[x].length; y++) {
       for (let gameItemIndex = 0; gameItemIndex < grid[x][y].length; gameItemIndex++) {
-        if (grid[x][y][gameItemIndex].hard) {
+        if (grid[x][y][gameItemIndex].obstacle) {
           pfgrid.setWalkableAt(x, y, false);
           break;
         }
@@ -499,6 +539,7 @@ function _convertGridToPathfindingGrid(grid) {
 
 function _generateItemLookupAndTags(game){
   return game.itemList.reduce((obj, item) => {
+    if(obj.items[item.name]) console.log(`WARNING DUPLICATE NAME ${item.name}`)
     obj.items[item.name] = item
     item.tags.forEach((tag) => {
       if(obj.tags[tag]){
