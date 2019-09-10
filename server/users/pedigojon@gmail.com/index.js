@@ -34,7 +34,7 @@ module.exports = function(game){
       x,
       y,
       z: 1,
-      _life: game.generateDuration(7, 'days'),
+      // _life: game.generateDuration(7, 'days'),
       character: 'E',
       sprite: 'entarkia-1',
       tags: ['human'],
