@@ -10,9 +10,12 @@
 
 // TODO Pathfinding overall needs game functions, we need
 
+//
+
 const PF = require('pathfinding');
 const finder = new PF.AStarFinder();
-
+const moment = require('moment');
+const config = require('../config');
 /*
 
 
@@ -24,16 +27,31 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 */
 
+function generateDuration(numberOf, timeMeasurement) {
+  const gameLoops = moment.duration(numberOf, timeMeasurement)/(config.updateDelta);
+  return gameLoops
+}
+
+function generateGameTimeDuration(numberOf, timeMeasurement) {
+  const hoursInOneHour = 24
+  const gameLoops = generateDuration(numberOf, timeMeasurement)/hoursInOneHour;
+  return gameLoops
+}
+
+function getDistance(coords, comparedTo) {
+  return Math.abs(comparedTo.x - coords.x) +  Math.abs(comparedTo.y - coords.y)
+}
+
 function sortByDistance(coordsA, coordsB, comparedTo){
-  const diffA = Math.abs(comparedTo.x - coordsA.x) +  Math.abs(comparedTo.y - coordsA.y)
-  const diffB = Math.abs(comparedTo.x - coordsB.x) +  Math.abs(comparedTo.y - coordsB.y)
+  const diffA = getDistance(coordsA, comparedTo)
+  const diffB = getDistance(coordsB, comparedTo)
   if(diffA < diffB) return -1
   else if(diffA > diffB)return 1
   else return 0
 }
 
-function forEveryGridNode(game, fx) {
-  game.grid.forEach((row, x) => {
+function forEveryGridNode(fx) {
+  this.grid.forEach((row, x) => {
     row.forEach((gridNode, y) => {
       fx(gridNode, x, y)
     })
@@ -105,10 +123,13 @@ function generateGameItemUpdate(oldItemList, updatedItemLookup, updatedItemList)
   }
 }
 
-function findItemNearby(game, x, y, tags, prioritizeNear) {
+function findItemNearby({position, tags, prioritizeNear }) {
   if(!Array.isArray(tags)) tags = [tags]
 
-  let matchingItems = getGameItemsFromGridByTags(game, x, y, tags)
+  // console.log(position)
+
+  const { x, y } = position
+  let matchingItems = this.getGameItemsFromGridByTags({ position, tags})
   if (matchingItems.length) {
     return matchingItems
   }
@@ -130,7 +151,7 @@ function findItemNearby(game, x, y, tags, prioritizeNear) {
 
   for (let i = 0; i < nearbyGrids.length; i++) {
     let { x, y } = nearbyGrids[i]
-    let matchingItems = getGameItemsFromGridByTags(game, x, y, tags)
+    let matchingItems = this.getGameItemsFromGridByTags({ position: nearbyGrids[i], tags})
     if(matchingItems.length) return matchingItems
   }
 
@@ -138,34 +159,42 @@ function findItemNearby(game, x, y, tags, prioritizeNear) {
   return []
 }
 
-function getGameItemsFromGridByTag(game, x, y, tag) {
-  return game.grid[x][y].filter(({tags}) => {
+function getGameItemsFromGridByTag({ position, tag}) {
+  const {x, y} = position
+  return this.grid[x][y].filter(({tags}) => {
     if(!tags) return false
     return tags.indexOf(tag) >= 0
   })
 }
 
-function getGameItemsFromGridByTags(game, x, y, tags) {
-  if(!game.grid[x]) return []
-  if(!game.grid[x][y]) return []
-  return game.grid[x][y].filter((item) => {
+function getGameItemsFromGridByTags({position, tags}) {
+  const { x, y } = position
+  if(!this.grid[x]) return []
+  if(!this.grid[x][y]) return []
+  return this.grid[x][y].filter((item) => {
     if(!item.tags) return false
     return tags.some(tag => item.tags.indexOf(tag) >= 0)
   })
 }
 
-function findOpenPath(game, fromX, fromY, toX, toY, onFail = () => {gameItem._behavior = 'default'}) {
-  const openGrid = findOpenGridNear(game, toX, toY, false, {x: fromX, y: fromY}, onFail)
-  return finder.findPath(fromX, fromY, openGrid.x, openGrid.y, game.pathfindingGrid);
+function findOpenPath({ fromPosition, toPosition, prioritizeNear = { x: fromPosition.x, y: fromPosition.x }, onFail = () => {gameItem._behavior = 'default'} }) {
+  const fromX = fromPosition.x
+  const fromY = fromPosition.y
+  const toX = toPosition.x
+  const toY = toPosition.y
+  const openGrid = this.findOpenGridNear({ position: toPosition, prioritizeNear: {x: prioritizeNear.x, y: prioritizeNear.y}, onFail})
+  return finder.findPath(fromX, fromY, openGrid.x, openGrid.y, this.pathfindingGrid);
 }
 
 // searches nearby grids for open space
 // returns null on fail
-function findOpenGridNear(game, x, y, onlySurrounding = false, prioritizeNear, onFail = () => {}){
-  game.pathfindingGrid = _convertGridToPathfindingGrid(game.grid)
+function findOpenGridNear({ position, onlySurrounding = false, prioritizeNear, onFail = () => {} }){
+  const { x, y } = position
+
+  this.pathfindingGrid = _convertGridToPathfindingGrid(this.grid)
   // console.log('looking for open grid near', x, y)
 
-  if(!onlySurrounding && isGridWalkable(game, x, y)) return { x, y }
+  if(!onlySurrounding && this.isGridWalkable(x, y)) return { x, y }
 
   const nearbyGrids = [
     { x, y: y-1},
@@ -180,7 +209,7 @@ function findOpenGridNear(game, x, y, onlySurrounding = false, prioritizeNear, o
 
   for (let i = 0; i < nearbyGrids.length; i++) {
     let { x, y } = nearbyGrids[i]
-    if(isGridWalkable(game, x, y)) return nearbyGrids[i]
+    if(this.isGridWalkable(x, y)) return nearbyGrids[i]
   }
 
   console.log('failed to find nearby grid for object');
@@ -188,17 +217,18 @@ function findOpenGridNear(game, x, y, onlySurrounding = false, prioritizeNear, o
   return null
 }
 
-
 // will search entire map before it gives up.
 // using during runTime could fail
-function forceFindOpenGridNear(game, x, y, level = 0){
+function forceFindOpenGridNear({position, level = 0}){
+  const {x, y} = position
+
   if(level == 0) {
-    game.pathfindingGrid = _convertGridToPathfindingGrid(game.grid)
+    this.pathfindingGrid = _convertGridToPathfindingGrid(this.grid)
   }
 
   console.log('looking for open grid near', x, y)
 
-  if(isGridWalkable(game, x, y)) return { x, y }
+  if(this.isGridWalkable(x, y)) return { x, y }
 
   const nearbyGrids = [
     { x, y: y-1},
@@ -213,44 +243,44 @@ function forceFindOpenGridNear(game, x, y, level = 0){
 
   for (let i = 0; i < nearbyGrids.length; i++) {
     let { x, y } = nearbyGrids[i]
-    if(isGridWalkable(game, x, y)) return nearbyGrids[i]
+    if(this.isGridWalkable(x, y)) return nearbyGrids[i]
   }
 
   console.log('failed to find nearby grid for object going recursive..')
   const nextGrid = nearbyGrids[Math.random() * nearbyGrids.length]
-  forceFindOpenGridNear(game, nextGrid.x, nextGrid.y, level++)
+  this.forceFindOpenGridNear(nextGrid.x, nextGrid.y, level++)
 }
 
-function isGridWalkable(game, x, y) {
-  if(!game.pathfindingGrid.nodes[y]) return false
-  if(!game.pathfindingGrid.nodes[y][x]) return false
-  if(!game.pathfindingGrid.nodes[y][x].walkable) return false
+function isGridWalkable( x, y) {
+  if(!this.pathfindingGrid.nodes[y]) return false
+  if(!this.pathfindingGrid.nodes[y][x]) return false
+  if(!this.pathfindingGrid.nodes[y][x].walkable) return false
   return true
 }
 
-function walkAround(game, obj, { intelligence } ) {
-  const { x, y } = obj
+function walkAround({ object, intelligence }) {
+  const { x, y } = object
 
   let direction = ''
   if(intelligence == 'basic') {
-    if(obj._direction) {
-      direction = obj._direction
+    if(object._direction) {
+      direction = object._direction
     }
   }
 
   if(Math.random() > .5){
     // go right
     if(Math.random() > .5 && direction !=='left'){
-      if ( isGridWalkable(game, x + 1, y) ){
-        if (intelligence == 'basic') obj._direction = 'right'
+      if ( this.isGridWalkable(x + 1, y) ){
+        if (intelligence == 'basic') object._direction = 'right'
         return { x: x + 1, y: y}
       }
     }
 
     // go left
     if(direction !== 'right') {
-      if ( isGridWalkable(game, x - 1, y) ) {
-        if (intelligence == 'basic') obj._direction = 'left'
+      if ( this.isGridWalkable(x - 1, y) ) {
+        if (intelligence == 'basic') object._direction = 'left'
         return { x: x - 1, y: y}
       }
     }
@@ -258,22 +288,22 @@ function walkAround(game, obj, { intelligence } ) {
 
   // go down
   if(Math.random() > .5 && direction !== 'up'){
-    if ( isGridWalkable(game, x, y + 1) ){
-      if (intelligence == 'basic') obj._direction = 'down'
+    if ( this.isGridWalkable(x, y + 1) ){
+      if (intelligence == 'basic') object._direction = 'down'
       return { x: x, y: y + 1}
     }
   }
 
   // go up
   if(direction !== 'down') {
-    if ( isGridWalkable(game, x, y - 1) ){
-      if (intelligence == 'basic') obj._direction = 'up'
+    if ( this.isGridWalkable(x, y - 1) ){
+      if (intelligence == 'basic') object._direction = 'up'
       return { x: x, y: y - 1}
     }
   }
 
   // random failed, find somewhere to move
-  obj._direction = ''
+  object._direction = ''
   // console.log('couldnt do rando movement, finding space')
   const nearbyGrids = [
     { x, y: y-1},
@@ -288,7 +318,7 @@ function walkAround(game, obj, { intelligence } ) {
 
   for (let i = 0; i < nearbyGrids.length; i++) {
     let { x, y } = nearbyGrids[i]
-    if (isGridWalkable(game, nearbyGrids[i].x, nearbyGrids[i].y)) {
+    if (this.isGridWalkable(nearbyGrids[i].x, nearbyGrids[i].y)) {
       return nearbyGrids[i]
     }
   }
@@ -297,29 +327,29 @@ function walkAround(game, obj, { intelligence } ) {
   return { x, y }
 }
 
-function addUpdate(game, {name, core, hijack = false, duration = 10, onEnd}, subject) {
+function addUpdate({name, core, hijack = false, duration = 10, onEnd}, subject) {
   if(!subject.updates) subject.updates = []
 
   // for normal ass controlled updates...
   if(core) {
     const update = {
-      core: core.bind(subject, game),
+      core: core.bind(subject, this),
     }
     subject.updates.push(update)
   }
 
   // for crazy ass mods you get from other people
   if(name) {
-    const mod = game.itemMods[name]
+    const mod = this.itemMods[name]
     if(!mod) return console.log(`missing mod ${name} on ${subject.name}`)
     const update = {
       name,
-      mod: mod.bind(subject, game),
+      mod: mod.bind(subject, this),
       hijack,
       duration,
     }
 
-    if(onEnd) update.onEnd = onEnd.bind(subject, game)
+    if(onEnd) update.onEnd = onEnd.bind(subject, this)
 
     if(hijack) {
       subject.updates.unshift(update)
@@ -341,7 +371,7 @@ function addUpdate(game, {name, core, hijack = false, duration = 10, onEnd}, sub
   }
 }
 
-function removeUpdate(game, name, subject) {
+function removeUpdate(name, subject) {
   for(let i = 0; i < subject.updates.length; i++){
     if(subject.updates[i].name === name){
       subject.updates.splice(i, 1)
@@ -350,9 +380,9 @@ function removeUpdate(game, name, subject) {
   }
 }
 
-function registerMod(game, name, fx) {
-  if(game.itemMods[name]) return console.log(`mod ${name} already registered`)
-  game.itemMods[name] = fx
+function registerMod(name, fx) {
+  if(this.itemMods[name]) return console.log(`mod ${name} already registered`)
+  this.itemMods[name] = fx
 }
 
 /*
@@ -385,19 +415,29 @@ module.exports = function(game = {}){
 
     // something might want this...
     game.forEveryGridNode = forEveryGridNode
+    game.generateDuration = generateDuration
 
     // pathfinding
     game.grid = _createGrid(game)
     game.pathfindingGrid = _convertGridToPathfindingGrid(game.grid)
     game.findOpenGridNear = findOpenGridNear
+    game.forceFindOpenGridNear = forceFindOpenGridNear
     game.walkAround = walkAround
     game.findOpenPath = findOpenPath
+    game.isGridWalkable = isGridWalkable
 
     // item finding
     game.findItemNearby = findItemNearby
+    game.getGameItemsFromGridByTags = getGameItemsFromGridByTags
+    game.getGameItemsFromGridByTag = getGameItemsFromGridByTag
 
     // client update
     game.generateGameItemUpdate = generateGameItemUpdate
+
+    // time
+    game.generateGameTimeDuration = generateGameTimeDuration
+    game.generateDuration = generateDuration
+
 
     // mods/server updates
     game.addUpdate = addUpdate
@@ -464,10 +504,15 @@ function _updateGameItem(game, gameItem, i, delta) {
   }
 }
 
+function _isGameItemDead(gameItem) {
+  return gameItem._life <= 0
+}
+
 function _updateGameItemLife(game, gameItem, index) {
+  if(gameItem._life === undefined) return
 
   gameItem._life = gameItem._life - 1
-  if(gameItem._life <= 0) {
+  if(_isGameItemDead(gameItem)) {
     if(gameItem.destroy) gameItem.destroy()
     console.log(`${gameItem.name} has died with _life of ${gameItem._life}`)
     gameItem.dead = true
@@ -521,6 +566,10 @@ function _createGrid(game){
   }
 
   game.itemList.forEach(gameItem => {
+    if(gameItem.x === undefined || gameItem.y === undefined){
+      // console.log('missing XY from GameItem: ' + gameItem.name)
+      return
+    }
     let gridNode = grid[gameItem.x][gameItem.y]
     if(gridNode){
       gridNode.push(gameItem)
@@ -538,7 +587,7 @@ function _convertGridToPathfindingGrid(grid) {
   for (let x = 0; x < grid.length; x++) {
     for (let y = 0; y < grid[x].length; y++) {
       for (let gameItemIndex = 0; gameItemIndex < grid[x][y].length; gameItemIndex++) {
-        if (grid[x][y][gameItemIndex].obstacle) {
+        if (grid[x][y][gameItemIndex].obstacle && !_isGameItemDead(grid[x][y][gameItemIndex])) {
           pfgrid.setWalkableAt(x, y, false);
           break;
         }
@@ -551,8 +600,15 @@ function _convertGridToPathfindingGrid(grid) {
 
 function _generateItemLookupAndTags(game){
   return game.itemList.reduce((obj, item) => {
-    if(obj.items[item.name]) console.log(`WARNING DUPLICATE NAME ${item.name}`)
+    if(obj.items[item.name]){
+      console.log(`WARNING DUPLICATE NAME ${item.name}`)
+      console.log('marking previous one as invisible')
+      obj.items[item.name].invisible = true
+      obj.items[item.name].obstacle = false
+    }
     obj.items[item.name] = item
+
+    if(!item.tags) return obj
     item.tags.forEach((tag) => {
       if(obj.tags[tag]){
         obj.tags[tag].push(item)

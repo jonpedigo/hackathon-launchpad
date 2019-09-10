@@ -23,7 +23,7 @@ XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 module.exports = function(game){
   function init(items){
-    game.forEveryGridNode(game, (gridNode, x, y) => {
+    game.forEveryGridNode((gridNode, x, y) => {
       items.push({
         name: `grass_x${x}y${y}`,
         x: x,

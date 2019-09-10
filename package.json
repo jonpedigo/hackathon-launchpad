@@ -26,6 +26,7 @@
     "express": "4.17.1",
     "jimp": "^0.8.0",
     "jsonwebtoken": "8.5.1",
+    "moment": "^2.24.0",
     "mongoose": "4.11.11",
     "mongoose-unique-validator": "1.0.6",
     "node": "12.9.0",

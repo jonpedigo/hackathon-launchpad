@@ -12,6 +12,7 @@ module.exports = async function(io){
   // game modifications
   const gameModifications = [];
   gameModifications.push(require('./nonusers/trees')(game));
+  gameModifications.push(require('./nonusers/time')(game));
   gameModifications.push(require('./users/sample@gmail.com')(game));
   gameModifications.push(require('./users/pedigojon@gmail.com')(game));
 
@@ -44,10 +45,10 @@ module.exports = async function(io){
     io.emit('update game', gameItemUpdate)
     //send new logs if there are any
     if(oldLogsLength < game.logs.length) {
-      io.emit('new logs', game.logs.slice(oldLogsLength))
+      io.emit('new logs', game.logs.slice(-100))
     }
     console.log('processed game loop in ' + (Date.now() - start) + 'ms')
-  }, Math.round(2000/config.speedModifier))
+  }, Math.round(config.updateDelta/config.speedModifier))
   console.log('game ' + game.id + ' started');
 
   // save every ten minutes

@@ -28,10 +28,14 @@ const initPixiApp = ({canvasRef, onLoad}) => {
       textures[tile.name] = texture
     })
 
-    app.loader.add('static/img/firepit-1.png').load(() => {
+    app.loader.add(['static/img/firepit-1.png', 'static/img/entarkia-1.png']).load(() => {
       let texture = PIXI.Texture.from('static/img/firepit-1.png');
       texture.name = 'firepit-1'
       textures['firepit-1'] = texture
+
+      texture = PIXI.Texture.from('static/img/entarkia-1.png');
+      texture.name = 'entarkia-1'
+      textures['entarkia-1'] = texture
       onLoad({app, textures})
     })
   })
@@ -49,6 +53,7 @@ const initGameItem = ({gameItem, textures, stage}) => {
     sprite.name = gameItem.name
     sprite.oldSprite = gameItem.sprite
     sprite.zIndex = gameItem.z
+    if(gameItem.tint) sprite.tint = gameItem.tint
     const addedChild = stage.addChild(sprite)
     if (gameItem.emitter) {
       let emitter = flameEmitter({stage, startPos: {x: gameItem.x * GRID_SIZE, y: gameItem.y * GRID_SIZE }})
@@ -71,6 +76,7 @@ const updateGameItem = ({gameItem, textures, stage}) => {
 
   // remove if its invisible now
   if (gameItem.invisible){
+    console.log(pixiChild.emitter)
     if(pixiChild.emitter) pixiChild.emitter.emit = false
     console.log('removing because invisible')
     stage.removeChild(pixiChild)
