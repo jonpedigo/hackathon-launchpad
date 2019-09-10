@@ -17,6 +17,8 @@ mongoose
     require('../nonusers/trees')(game).init(game.itemList);
     require('../nonusers/time')(game).init(game.itemList);
     require('../users/pedigojon@gmail.com')(game).init(game.itemList);
+    require('../users/spencejw@gmail.com')(game).init(game.itemList);
+    require('../users/spencejw@gmail.com/index2')(game).init(game.itemList);
 
     gameState.itemList = game.itemList
     gameState.save().then((game) => {

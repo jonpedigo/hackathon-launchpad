@@ -1,6 +1,6 @@
 // how pixi loads and draws game items for a basic map setup
 
-import * as PIXI from 'pixi.js'
+import * as PIXI from 'pixi.js-legacy'
 import tileset from './tileset.json'
 import { flameEmitter } from './particles'
 
@@ -36,6 +36,10 @@ const initPixiApp = ({canvasRef, onLoad}) => {
       texture = PIXI.Texture.from('static/img/entarkia-1.png');
       texture.name = 'entarkia-1'
       textures['entarkia-1'] = texture
+
+      texture = PIXI.Texture.from('static/img/spencer-1.png');
+      texture.name = 'spencer-1'
+      textures['spencer-1'] = texture
       onLoad({app, textures})
     })
   })
@@ -48,8 +52,8 @@ const initGameItem = ({gameItem, textures, stage}) => {
     let sprite = new PIXI.Sprite(textures[gameItem.sprite])
     sprite.transform.position.x = (gameItem.x * GRID_SIZE)
     sprite.transform.position.y = (gameItem.y * GRID_SIZE)
-    sprite.transform.scale.x = 5
-    sprite.transform.scale.y = 5
+    sprite.transform.scale.x = 5.3
+    sprite.transform.scale.y = 5.3
     sprite.name = gameItem.name
     sprite.oldSprite = gameItem.sprite
     sprite.zIndex = gameItem.z

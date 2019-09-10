@@ -143,7 +143,7 @@ function _update(game, delta) {
         x: x,
         y: y,
         z: 0,
-        _life: game.generateGameTimeDuration(1, 'hours'),
+        _life: game.generateGameTimeDuration((Math.random() * .7) + .3, 'hours'),
         obstacle: true,
       })
       this._behavior = 'sit_with_fire'
@@ -165,6 +165,6 @@ function _update(game, delta) {
     let [nextX, nextY] = this._path.shift()
     this.x = nextX
     this.y = nextY
-    console.log(`moving to ${nextX} ${nextY}`)
+    // console.log(`moving to ${nextX} ${nextY}`)
   }
 }

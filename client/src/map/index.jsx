@@ -6,6 +6,10 @@ import socket from './socket'
 function onLoad({app, textures, pixiItems}){
   const stage = app.stage;
   keyboard({stage})
+
+  // stage.pivot.x = 70 * 40
+  // stage.pivot.y = 70 * 40
+
   socket.listen({
     onInitGameItem: ({gameItem}) => {
       map.initGameItem({gameItem, stage, textures})

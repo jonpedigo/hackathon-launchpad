@@ -15,6 +15,8 @@ module.exports = async function(io){
   gameModifications.push(require('./nonusers/time')(game));
   gameModifications.push(require('./users/sample@gmail.com')(game));
   gameModifications.push(require('./users/pedigojon@gmail.com')(game));
+  gameModifications.push(require('./users/spencejw@gmail.com')(game));
+  gameModifications.push(require('./users/spencejw@gmail.com/index2')(game));
 
   gameModifications.forEach(({setup}) => {
     setup();

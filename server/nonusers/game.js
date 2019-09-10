@@ -10,6 +10,9 @@
 
 // TODO Pathfinding overall needs game functions, we need
 
+// TODO: maybe the world is round....
+
+// TODO: For some reason some items are not disspears
 //
 
 const PF = require('pathfinding');
@@ -123,7 +126,39 @@ function generateGameItemUpdate(oldItemList, updatedItemLookup, updatedItemList)
   }
 }
 
-function findItemNearby({position, tags, prioritizeNear }) {
+function clearGrids({grids, fillIn}){
+  this.grid = _createGrid(this)
+  grids.forEach((grid) => {
+    this.grid[grid[0]][grid[1]].forEach((gameItem) => {
+      // FIX THIS LATER
+      if(fillIn) fillIn(grid[0], grid[1])
+      gameItem.invisible = true
+      gameItem.dead = true
+      gameItem._life = 0
+    })
+  })
+}
+
+function clearArea({position, distance, fillIn}) {
+  const startX = position.x - distance/2
+  const startY = position.y - distance/2
+  this.grid = _createGrid(this)
+  for(let x = startX; x < startX + distance; x++) {
+    if(!this.grid[x]) continue;
+    for(let y = startX; y < startX + distance; y++) {
+      if(!this.grid[x][y]) continue;
+      this.grid[x][y].forEach((gameItem) => {
+        // FIX THIS LATER
+        if(fillIn) fillIn(x, y)
+        gameItem.invisible = true
+        gameItem.dead = true
+        gameItem._life = 0
+      })
+    }
+  }
+}
+
+function findItemNearby({position, tags, prioritizeNear, distance = { x: 1, y: 1} }) {
   if(!Array.isArray(tags)) tags = [tags]
 
   // console.log(position)
@@ -134,16 +169,16 @@ function findItemNearby({position, tags, prioritizeNear }) {
     return matchingItems
   }
 
-  const nearbyGrids = [
-    { x, y: y-1},
-    { x: x+1, y: y-1},
-    { x: x+1, y},
-    { x: x+1, y: y+1},
-    { x: x, y: y+1},
-    { x: x-1, y: y+1},
-    { x: x-1, y},
-    { x: x-1, y: y-1},
-  ]
+  const startX = position.x - distance.x/2
+  const startY = position.y - distance.y/2
+  const nearbyGrids = []
+  for(let xI = startX; xI < startX + distance.x; xI++) {
+    for(let yI = startX; yI < startY + distance.y; yI++) {
+      nearbyGrids.push({
+        x: xI, y: yI
+      })
+    }
+  }
 
   if(prioritizeNear) {
     nearbyGrids.sort((a, b) => sortByDistance(a, b, prioritizeNear))
@@ -177,13 +212,21 @@ function getGameItemsFromGridByTags({position, tags}) {
   })
 }
 
-function findOpenPath({ fromPosition, toPosition, prioritizeNear = { x: fromPosition.x, y: fromPosition.x }, onFail = () => {gameItem._behavior = 'default'} }) {
+function findOpenPath({ fromPosition, toPosition, prioritizeNear = { x: fromPosition.x, y: fromPosition.x }, onFail = () => {} }) {
   const fromX = fromPosition.x
   const fromY = fromPosition.y
   const toX = toPosition.x
   const toY = toPosition.y
   const openGrid = this.findOpenGridNear({ position: toPosition, prioritizeNear: {x: prioritizeNear.x, y: prioritizeNear.y}, onFail})
   return finder.findPath(fromX, fromY, openGrid.x, openGrid.y, this.pathfindingGrid);
+}
+
+function findPath({fromPosition, toPosition}) {
+  const fromX = fromPosition.x
+  const fromY = fromPosition.y
+  const toX = toPosition.x
+  const toY = toPosition.y
+  return finder.findPath(fromX, fromY, toX, toY, this.pathfindingGrid);
 }
 
 // searches nearby grids for open space
@@ -214,7 +257,8 @@ function findOpenGridNear({ position, onlySurrounding = false, prioritizeNear, o
 
   console.log('failed to find nearby grid for object');
   onFail()
-  return null
+  // EVERYTHING SHOULD HAVE A DEFAULT X THAT WHEN IT FAILS IT MUST RETURN TO AND BEGIND EFAULT BEHJAVIOR
+  return { x: 10, y: 10}
 }
 
 // will search entire map before it gives up.
@@ -424,6 +468,7 @@ module.exports = function(game = {}){
     game.forceFindOpenGridNear = forceFindOpenGridNear
     game.walkAround = walkAround
     game.findOpenPath = findOpenPath
+    game.findPath = findPath
     game.isGridWalkable = isGridWalkable
 
     // item finding
@@ -438,11 +483,14 @@ module.exports = function(game = {}){
     game.generateGameTimeDuration = generateGameTimeDuration
     game.generateDuration = generateDuration
 
-
     // mods/server updates
     game.addUpdate = addUpdate
     game.registerMod = registerMod
     game.removeUpdate = removeUpdate
+
+    // destruction
+    game.clearArea = clearArea
+    game.clearGrids = clearGrids
 
     return game
   }
@@ -601,8 +649,8 @@ function _convertGridToPathfindingGrid(grid) {
 function _generateItemLookupAndTags(game){
   return game.itemList.reduce((obj, item) => {
     if(obj.items[item.name]){
-      console.log(`WARNING DUPLICATE NAME ${item.name}`)
-      console.log('marking previous one as invisible')
+      // console.log(`WARNING DUPLICATE NAME ${item.name}`)
+      // console.log('marking previous one as invisible')
       obj.items[item.name].invisible = true
       obj.items[item.name].obstacle = false
     }
