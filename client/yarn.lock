@@ -7776,6 +7776,11 @@ send@0.17.1:
     range-parser "~1.2.1"
     statuses "~1.5.0"
 
+sentiment@^5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/sentiment/-/sentiment-5.0.2.tgz#01e4396d9b5b17b1176f16c9d1a8be87b16cc1d6"
+  integrity sha512-ZeC3y0JsOYTdwujt5uOd7ILJNilbgFzUtg/LEG4wUv43LayFNLZ28ec8+Su+h3saHlJmIwYxBzfDHHZuiMA15g==
+
 serve-index@^1.7.2:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/serve-index/-/serve-index-1.9.1.tgz#d3768d69b1e7d82e5ce050fff5b453bea12a9239"
@@ -7873,6 +7878,11 @@ signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"
   integrity sha1-tf3AjxKH6hF4Yo5BXiUTK3NkbG0=
+
+similar-english-words@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/similar-english-words/-/similar-english-words-1.0.0.tgz#187efd037fb17e44176eb4f0858673316d5587dc"
+  integrity sha1-GH79A3+xfkQXbrTwhYZzMW1Vh9w=
 
 slash@^1.0.0:
   version "1.0.0"

@@ -82,7 +82,7 @@ const authenticate = async (socket, data, callback) => {
 // Register Actions
 const postAuthenticate = socket => {
   socket.emit('authenticated', jwt.sign(socket.user.username, 'secret-words'))
-  game(socket)
+  // game(socket)
 }
 
 // Configure Authentication
