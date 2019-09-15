@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react"
 import * as PIXI from 'pixi.js'
-import { Viewport } from 'pixi-viewport'
 
 import { flameEmitter } from './particles'
 
@@ -36,23 +35,7 @@ export default function Home() {
 
     // initialize pixi renderer and camera
     const app = new PIXI.Application({ view: canvasRef.current, width: width, height: height })
-    const viewport = new Viewport({
-        screenWidth: width,
-        screenHeight: height,
-        worldWidth: worldWidth,
-        worldHeight: worldHeight,
-        interaction: app.renderer.interaction,
-    })
-    viewport
-        .drag()
-        .wheel({ percent: 0.3 })
-        .decelerate()
-        .clampZoom({
-          maxWidth: worldWidth,
-          maxHeight: worldHeight,
-        })
-    app.stage.addChild(viewport)
-    const stage = viewport;
+    const stage = app.stage;
 
     // initialize game state
     window.socket.emit('listen for game updates')
