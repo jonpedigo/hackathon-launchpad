@@ -12,27 +12,24 @@ let sentiment = new Sentiment();
 
 // const words = require("similar-english-words");
 // console.log(words.crazy)
-
+let SAVED_POEMS = {}
 export default function Home() {
   let [answers, setAnswers] = useState({
-    before: 'waitress, serving other people, same routine, same schedule, no $$. GM of small company - got better b/c I could make my own decisions, but still ultimately worked for the CEO and was not in control of the direction of my job. ',
-    become: 'I make decisions about my life and my life only. I don’t have to answer to anyone else. I don’t have to rely on someone else to make a living. I wish I was more self-made instead of depending on a client needing my time.',
-    now: 'scheduling someone else’s life, answering to someone else, constantly trying to read and please that person and be perfect for someone else.',
+    before: '',
+    become: '',
+    now: '',
   })
 
   let [poems, setPoems] = useState({
     romance: [],
     terence: [],
   })
-  // useEffect(() => {
-  //
-  // }, [])
 
   function onChange(value, property){
     setAnswers({...answers, [property]: value})
   }
 
-  const notAllowedDefault = ['i', 'that','not', 'to']
+  const notAllowedDefault = ['i', 'that','not', 'to', 'want', 'my', 'don\'t', 'dont', 'of', 'have', 'was', 'instead']
   function filterWords(words, notAllowed = notAllowedDefault){
 
     return words.split(' ').filter((word) => {
@@ -47,14 +44,13 @@ export default function Home() {
   function replaceWords(words) {
     var regexAnd = /and/gi;
     var regexBut = /but/gi;
-    console.log('replacedand', words.replace(regexAnd, ','))
     return words.replace(regexAnd, ',').replace(regexBut, ',')
   }
 
   function generateTerencePoem() {
     let lines = [answers.before, answers.now, answers.become]
     const analysis = sentiment.analyze(lines.join(' '));
-    return lines.map((words) => {
+    return lines.map((words, i) => {
       words = replaceWords(words)
       words = filterWords(words)
       words = filterWords(words, analysis.negative)
@@ -68,32 +64,56 @@ export default function Home() {
 
     setPoems({
       romance: poem,
-      terence: terencePoem
+      terence: terencePoem,
     })
+
+    SAVED_POEMS = {
+      romance: poem,
+      terence: terencePoem,
+    }
+
+    setAnswers({
+      ...answers,
+      submitted: true,
+    })
+
+    setTimeout(() => {
+      setPoems({
+        ...SAVED_POEMS,
+        show: true,
+      })
+    }, 2000)
   }
 
   return <div className='home'>
-    <h3>What it was before</h3>
-    <input value={answers.before} onChange={(e) => onChange(e.target.value, 'before')}/>
+    <div className='answers' style={{opacity: answers.submitted ? 0 : 1}}>
+      <h1>Welcome,</h1>
+      <p>
+      To receive insight in the shape of a poem, <br></br>
+      describe what it is that you wish to transform: <br></br></p>
 
-    <h3>What is it now</h3>
-    <input value={answers.now} onChange={(e) => onChange(e.target.value, 'now')}/>
+      <h3>What was it before</h3>
+      <textarea value={answers.before} onChange={(e) => onChange(e.target.value, 'before')}></textarea>
 
-    <h3>What do you wish it would become</h3>
-    <input value={answers.become} onChange={(e) => onChange(e.target.value, 'become')}/>
+      <h3>What is it now</h3>
+      <textarea value={answers.now} onChange={(e) => onChange(e.target.value, 'now')}></textarea>
 
-    <div>
-      <button onClick={onSubmitClick}>Submit your POEMS</button>
+      <h3>What do you wish it would become</h3>
+      <textarea value={answers.become} onChange={(e) => onChange(e.target.value, 'become')}></textarea>
+
+      <div>
+        <button onClick={onSubmitClick}>Proceed</button>
+      </div>
     </div>
 
-    <h5>ROMANCE.js POEM</h5>
-    <div>
-      {poems.romance.map((line) => <div>{line}</div>)}
-    </div>
-
-    <h5>TERENCE POEM</h5>
-    <div>
-      {poems.terence.map((line) => <div>{line}</div>)}
+    <div className='poems' style={{opacity: poems.show ? 1: 0}}>
+      <div>
+        {poems.terence.map((line) => <div>{line}</div>)}
+      </div>
+      <br></br>
+      <p>Your story continues...<br></br><br></br>
+          #metaforyou
+        </p>
     </div>
   </div>
 }
