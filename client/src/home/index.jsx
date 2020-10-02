@@ -58,6 +58,8 @@ export default function Home() {
     const poem = generatePoem(filterWords([answers.before, answers.now, ,answers.become].join(' ')), 3)
     const terencePoem = generateTerencePoem()
 
+    console.log(poem)
+
     setPoems({
       romance: poem,
       terence: terencePoem,
