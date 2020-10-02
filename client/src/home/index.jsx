@@ -8,10 +8,6 @@ import Sentiment from 'sentiment'
 
 let sentiment = new Sentiment();
 
-// var result = sentiment.analyze('Cats are stupid smart');
-
-// const words = require("similar-english-words");
-// console.log(words.crazy)
 let SAVED_POEMS = {}
 export default function Home() {
   let [answers, setAnswers] = useState({
@@ -29,7 +25,7 @@ export default function Home() {
     setAnswers({...answers, [property]: value})
   }
 
-  const notAllowedDefault = ['i', 'that','not', 'to', 'want', 'my', 'don\'t', 'dont', 'of', 'have', 'was', 'instead']
+  const notAllowedDefault = ['i', 'that','not', 'to', 'want', 'my', 'don\'t', 'dont', 'of', 'have', 'was', 'instead', 'bad']
   function filterWords(words, notAllowed = notAllowedDefault){
 
     return words.split(' ').filter((word) => {
